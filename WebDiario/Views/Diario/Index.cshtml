@@ -1,0 +1,143 @@
+﻿@model IEnumerable<WebDiario.Models.EntradaDiario>
+
+@{
+    ViewData["Title"] = "Minhas Memórias";
+    var termoAtual = ViewData["TermoBuscaAtual"] as string;
+    var humorAtual = ViewData["HumorAtual"] as string;
+    bool temFiltroAtivo = !string.IsNullOrEmpty(termoAtual) || !string.IsNullOrEmpty(humorAtual);
+}
+
+<div class="container py-4">
+    <!-- Cabeçalho com Ações -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center pb-3 mb-4 border-bottom gap-3">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">📖 Minhas Memórias</h1>
+            <p class="text-muted small mb-0">
+                @if (temFiltroAtivo)
+                {
+                    <span>Encontrados <strong>@Model.Count()</strong> resultados para a busca</span>
+                }
+                else
+                {
+                    <span>Total de <strong>@Model.Count()</strong> @(Model.Count() == 1 ? "registro guardado" : "registros guardados")</span>
+                }
+            </p>
+        </div>
+        <div>
+            <a asp-action="Criar" class="btn btn-dark rounded-pill px-4 shadow-sm">
+                + Nova Anotação
+            </a>
+        </div>
+    </div>
+
+    <!-- Barra de Pesquisa e Filtros (Método GET) -->
+    <div class="card border rounded-4 shadow-sm bg-white p-3 mb-4">
+        <form asp-action="Index" method="get" class="row g-2 align-items-center">
+            
+            <!-- Campo de Texto -->
+            <div class="col-md-6 col-lg-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-light-subtle rounded-start-pill text-muted">🔍</span>
+                    <input type="text" 
+                           name="termoBusca" 
+                           value="@termoAtual" 
+                           class="form-control border-light-subtle rounded-end-pill" 
+                           placeholder="Pesquisar por título ou conteúdo..." />
+                </div>
+            </div>
+
+            <!-- Select de Humor -->
+            <div class="col-md-4 col-lg-3">
+                <select name="filtroHumor" class="form-select border-light-subtle rounded-pill">
+                    <option value="">Todos os Sentimentos</option>
+                    <option value="😊 Feliz / Realizado" selected="@(humorAtual == "😊 Feliz / Realizado")">😊 Feliz / Realizado</option>
+                    <option value="🚀 Produtivo / Focado" selected="@(humorAtual == "🚀 Produtivo / Focado")">🚀 Produtivo / Focado</option>
+                    <option value="🤔 Reflexivo / Calmo" selected="@(humorAtual == "🤔 Reflexivo / Calmo")">🤔 Reflexivo / Calmo</option>
+                    <option value="😴 Cansado / Relaxando" selected="@(humorAtual == "😴 Cansado / Relaxando")">😴 Cansado / Relaxando</option>
+                    <option value="⚡ Ansioso / Preocupado" selected="@(humorAtual == "⚡ Ansioso / Preocupado")">⚡ Ansioso / Preocupado</option>
+                </select>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="col-md-2 col-lg-2 d-flex gap-2">
+                <button type="submit" class="btn btn-dark rounded-pill w-100">
+                    Filtrar
+                </button>
+                @if (temFiltroAtivo)
+                {
+                    <a asp-action="Index" class="btn btn-light border rounded-pill" title="Limpar Filtros">
+                        ✕
+                    </a>
+                }
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Lista de Anotações -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 my-4 bg-white rounded-4 border p-5 shadow-sm">
+            @if (temFiltroAtivo)
+            {
+                <div class="display-4 mb-3">🔍</div>
+                <h4 class="fw-semibold text-dark">Nenhum registro encontrado</h4>
+                <p class="text-muted mx-auto mb-3" style="max-width: 400px;">
+                    Não encontramos anotações com os termos ou filtros aplicados.
+                </p>
+                <a asp-action="Index" class="btn btn-outline-dark rounded-pill px-4">
+                    Limpar Pesquisa
+                </a>
+            }
+            else
+            {
+                <div class="display-3 mb-3">🍃</div>
+                <h4 class="fw-semibold text-dark">Nenhuma anotação por aqui ainda</h4>
+                <p class="text-muted mx-auto mb-4" style="max-width: 420px;">
+                    Seu diário está esperando seus primeiros pensamentos, metas ou desabafos do dia.
+                </p>
+                <a asp-action="Criar" class="btn btn-outline-dark rounded-pill px-4">
+                    Começar a escrever
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border rounded-4 bg-white shadow-sm diary-card d-flex flex-column">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-light text-secondary border rounded-pill px-3 py-2 fw-normal">
+                                    📅 @item.DataCriacao.ToString("dd 'de' MMM, yyyy")
+                                </span>
+                                @if (!string.IsNullOrEmpty(item.Humor))
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-2">
+                                        @item.Humor
+                                    </span>
+                                }
+                            </div>
+
+                            <h5 class="card-title fw-bold text-dark mb-2 text-truncate">@item.Titulo</h5>
+                            <p class="card-text text-muted small flex-grow-1 line-clamp-3 mb-4">@item.Conteudo</p>
+
+                            <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-auto">
+                                <a asp-action="Detalhes" asp-route-id="@item.Id" class="btn btn-sm btn-link text-decoration-none text-dark fw-semibold ps-0">
+                                    Ler mais →
+                                </a>
+                                <div class="btn-group">
+                                    <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-light rounded-start-pill text-muted px-3 border">Editar</a>
+                                    <a asp-action="Excluir" asp-route-id="@item.Id" class="btn btn-sm btn-light rounded-end-pill text-danger px-3 border border-start-0">Excluir</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

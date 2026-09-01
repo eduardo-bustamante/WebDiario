@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebDiario</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebDiario.styles.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <header>
+        <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom shadow-sm mb-4 py-3">
+            <div class="container">
+                <!-- Marca / Logo -->
+                <a class="navbar-brand fw-bold text-secondary d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                    <span class="fs-4">📓</span>
+                    <span class="text-dark">Meu Diário</span>
+                </a>
+
+                <!-- Botão Hamburger Mobile -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
+                        aria-controls="navbarMain" aria-expanded="false" aria-label="Menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Itens Colapsáveis -->
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0 ms-md-3">
+                        <li class="nav-item">
+                            <a class="nav-link text-muted" asp-controller="Home" asp-action="Index">Início</a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-muted" asp-controller="Diario" asp-action="Index">Meus Registros</a>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Seção de Ações e Usuário -->
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mt-3 mt-md-0">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-controller="Diario" asp-action="Criar" class="btn btn-outline-secondary btn-sm px-3 rounded-pill">
+                                + Escrever Agora
+                            </a>
+                            <span class="text-muted small ms-md-2">
+                                Olá, <strong>@(User.Identity.Name?.Split('@')[0] ?? "Usuário")</strong>
+                            </span>
+                            <form asp-controller="Conta" asp-action="Sair" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-light border rounded-pill px-3">
+                                    Sair
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a asp-controller="Conta" asp-action="Login" class="btn btn-link text-decoration-none text-muted btn-sm">
+                                Entrar
+                            </a>
+                            <a asp-controller="Conta" asp-action="Registrar" class="btn btn-dark btn-sm rounded-pill px-3">
+                                Criar Conta
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container flex-grow-1">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted py-3 bg-white mt-auto">
+        <div class="container text-center small">
+            &copy; 2026 - WebDiario - Seu diário pessoal seguro
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

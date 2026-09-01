@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Bem-vindo ao Diário";
+}
+
+<div class="container py-4">
+    <!-- Bloco Hero de Apresentação -->
+    <div class="row align-items-center py-5 rounded-4 p-4 p-md-5 mb-5" style="background-color: #f8f9fa;">
+        <div class="col-lg-6 mb-4 mb-lg-0 pe-lg-4">
+            <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill mb-3 fw-medium">
+                Reflexão
+            </span>
+            <h1 class="display-5 fw-bold text-dark lh-sm mb-3">
+                Um espaço diário para organizar ideias e sentimentos.
+            </h1>
+            <p class="lead text-muted mb-4">
+                Um diário digital minimalista, seguro e direto ao ponto. Registre momentos marcantes, acompanhe a evolução do seu humor e construa o hábito diário da escrita.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a asp-controller="Diario" asp-action="Index" class="btn btn-dark btn-lg px-4 rounded-pill">
+                    Abrir Meu Diário
+                </a>
+                <a asp-controller="Diario" asp-action="Criar" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">
+                    Criar Primeiro Registro
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-6 text-center">
+            <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=900&q=80" 
+                 alt="Caderno aberto com caneta em uma mesa organizada" 
+                 class="img-fluid rounded-4 shadow" 
+                 style="max-height: 420px; width: 100%; object-fit: cover;" />
+        </div>
+    </div>
+
+    <!-- Destaques do Sistema -->
+    <div class="row g-4 text-center mt-2">
+        <div class="col-md-4">
+            <div class="p-4 border rounded-3 bg-white h-100 shadow-sm">
+                <div class="fs-1 mb-2">✍️</div>
+                <h5 class="fw-semibold text-dark">Escrita Livre</h5>
+                <p class="text-muted small mb-0">Registre seus dias sem distrações, salvando seus pensamentos mais sinceros em um só lugar.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 border rounded-3 bg-white h-100 shadow-sm">
+                <div class="fs-1 mb-2">🎯</div>
+                <h5 class="fw-semibold text-dark">Acompanhamento de Humor</h5>
+                <p class="text-muted small mb-0">Classifique o estado de espírito de cada dia e observe seus padrões de bem-estar ao longo do tempo.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 border rounded-3 bg-white h-100 shadow-sm">
+                <div class="fs-1 mb-2">🔒</div>
+                <h5 class="fw-semibold text-dark">Armazenamento Local</h5>
+                <p class="text-muted small mb-0">Seus dados ficam estruturados no banco de dados SQLite, com total integridade e simplicidade de backup.</p>
+            </div>
+        </div>
+    </div>
+</div>

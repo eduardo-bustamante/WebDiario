@@ -1,0 +1,33 @@
+﻿@model WebDiario.Models.EntradaDiario
+
+@{
+    ViewData["Title"] = "Excluir Memória";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            
+            <div class="card border-0 rounded-4 shadow bg-white p-4 text-center">
+                <div class="fs-1 text-danger mb-2">🗑️</div>
+                <h4 class="fw-bold text-dark mb-2">Deseja apagar este registro?</h4>
+                <p class="text-muted small mb-4">
+                    Esta ação removerá permanentemente a anotação abaixo do seu diário.
+                </p>
+
+                <!-- Prévia do que será excluído -->
+                <div class="bg-light p-3 rounded-3 text-start mb-4 border">
+                    <h6 class="fw-bold text-dark mb-1 text-truncate">@Model.Titulo</h6>
+                    <span class="text-muted small">📅 @Model.DataCriacao.ToString("dd/MM/yyyy")</span>
+                </div>
+
+                <form asp-action="Excluir" method="post" class="d-flex gap-2 justify-content-center">
+                    <input type="hidden" asp-for="Id" />
+                    <a asp-action="Index" class="btn btn-light rounded-pill px-4 flex-grow-1">Cancelar</a>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 flex-grow-1 shadow-sm">Excluir Registro</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>

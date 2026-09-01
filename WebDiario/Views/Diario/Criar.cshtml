@@ -1,0 +1,68 @@
+﻿@model WebDiario.Models.EntradaDiario
+
+@{
+    ViewData["Title"] = "Nova Anotação";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <a asp-action="Index" class="btn btn-link text-muted text-decoration-none mb-3 ps-0">
+                ← Voltar para as memórias
+            </a>
+
+            <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
+                <div class="mb-4">
+                    <h2 class="fw-bold text-dark mb-1">O que está na sua mente hoje?</h2>
+                    <p class="text-muted small">Reserve um instante para registrar suas ideias.</p>
+                </div>
+
+                <form asp-action="Criar" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Título -->
+                    <div class="mb-4">
+                        <label asp-for="Titulo" class="form-label fw-semibold text-secondary small text-uppercase">Título</label>
+                        <input asp-for="Titulo" class="form-control form-control-lg rounded-3 border-light-subtle" placeholder="Ex: Ideias para o projeto, Um dia incrível..." />
+                        <span asp-validation-for="Titulo" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Data e Humor -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="DataCriacao" class="form-label fw-semibold text-secondary small text-uppercase">Data</label>
+                            <input asp-for="DataCriacao" type="date" class="form-control rounded-3 border-light-subtle" />
+                            <span asp-validation-for="DataCriacao" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Humor" class="form-label fw-semibold text-secondary small text-uppercase">Como você se sente?</label>
+                            <select asp-for="Humor" class="form-select rounded-3 border-light-subtle">
+                                <option value="😊 Feliz / Realizado">😊 Feliz / Realizado</option>
+                                <option value="🚀 Produtivo / Focado">🚀 Produtivo / Focado</option>
+                                <option value="🤔 Reflexivo / Calmo">🤔 Reflexivo / Calmo</option>
+                                <option value="😴 Cansado / Relaxando">😴 Cansado / Relaxando</option>
+                                <option value="⚡ Ansioso / Preocupado">⚡ Ansioso / Preocupado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo Principal -->
+                    <div class="mb-4">
+                        <label asp-for="Conteudo" class="form-label fw-semibold text-secondary small text-uppercase">Pensamentos & Detalhes</label>
+                        <textarea asp-for="Conteudo" rows="9" class="form-control rounded-3 border-light-subtle p-3" 
+                                  placeholder="Escreva livremente aqui..."></textarea>
+                        <span asp-validation-for="Conteudo" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="d-flex justify-content-end align-items-center gap-3 pt-3 border-top">
+                        <a asp-action="Index" class="btn btn-light rounded-pill px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-dark rounded-pill px-5 shadow-sm">Guardar Registro</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
