@@ -1,0 +1,225 @@
+﻿@model IEnumerable<WebDiario.Models.Livro>
+
+@{
+    ViewData["Title"] = "Minha Biblioteca";
+    var busca = ViewData["BuscaAtual"] as string;
+    var statusAtual = ViewData["StatusAtual"] as string;
+    bool temFiltroAtivo = !string.IsNullOrEmpty(busca) || !string.IsNullOrEmpty(statusAtual);
+}
+
+<div class="container py-4">
+    <!-- Cabeçalho -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center pb-3 mb-4 border-bottom gap-3">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">📚 Minha Biblioteca</h1>
+            <p class="text-muted small mb-0">
+                @if (temFiltroAtivo)
+                {
+                    <span>Encontrados <strong>@Model.Count()</strong> livros para o filtro aplicado</span>
+                }
+                else
+                {
+                    <span>Total de <strong>@Model.Count()</strong> @(Model.Count() == 1 ? "livro catalogado" : "livros catalogados")</span>
+                }
+            </p>
+        </div>
+        <a asp-action="Criar" class="btn btn-dark rounded-pill px-4 shadow-sm">+ Novo Livro</a>
+    </div>
+
+    <!-- Barra de Pesquisa e Filtros -->
+    <div class="card border rounded-4 shadow-sm bg-white p-3 mb-4">
+        <form asp-action="Index" method="get" class="row g-2 align-items-center">
+
+            <div class="col-md-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-light-subtle rounded-start-pill text-muted">🔍</span>
+                    <input type="text"
+                           name="busca"
+                           value="@busca"
+                           class="form-control border-light-subtle rounded-end-pill"
+                           placeholder="Pesquisar por título ou autor..." />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <select name="status" class="form-select border-light-subtle rounded-pill">
+                    <option value="">Todos os Status</option>
+                    <option value="Quero Ler" selected="@(statusAtual == "Quero Ler")">📌 Quero Ler</option>
+                    <option value="Lendo" selected="@(statusAtual == "Lendo")">📖 Lendo</option>
+                    <option value="Lido" selected="@(statusAtual == "Lido")">✅ Lido</option>
+                    <option value="Abandonado" selected="@(statusAtual == "Abandonado")">⏹ Abandonado</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-dark rounded-pill w-100">Filtrar</button>
+                @if (temFiltroAtivo)
+                {
+                    <a asp-action="Index" class="btn btn-light border rounded-pill" title="Limpar Filtros">✕</a>
+                }
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Grade de Livros -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 my-4 bg-white rounded-4 border p-5 shadow-sm">
+            @if (temFiltroAtivo)
+            {
+                <div class="display-4 mb-3">🔍</div>
+                <h4 class="fw-semibold text-dark">Nenhum livro encontrado</h4>
+                <p class="text-muted mx-auto mb-3" style="max-width: 400px;">
+                    Não encontramos livros com os termos ou status selecionados.
+                </p>
+                <a asp-action="Index" class="btn btn-outline-dark rounded-pill px-4">Limpar Filtros</a>
+            }
+            else
+            {
+                <div class="display-3 mb-3">📖</div>
+                <h4 class="fw-semibold text-dark">Sua estante ainda está vazia</h4>
+                <p class="text-muted mx-auto mb-4" style="max-width: 420px;">
+                    Comece adicionando os livros que você já possui ou os títulos que planeja ler.
+                </p>
+                <a asp-action="Criar" class="btn btn-outline-dark rounded-pill px-4">Catalogar meu primeiro livro</a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var livro in Model)
+            {
+                var corStatus = livro.Status switch
+                {
+                    "Lendo" => "bg-primary-subtle text-primary border border-primary-subtle",
+                    "Lido" => "bg-success-subtle text-success border border-success-subtle",
+                    "Quero Ler" => "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
+                    "Abandonado" => "bg-danger-subtle text-danger border border-danger-subtle",
+                    _ => "bg-secondary-subtle text-secondary border border-secondary-subtle"
+                };
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border rounded-4 bg-white shadow-sm d-flex flex-column p-3 p-md-4">
+
+                        <!-- Topo do Card: Capa + Informações -->
+                        <div class="d-flex gap-3 mb-3">
+
+                            <!-- Capa clicável com proporção fixa -->
+                            <a asp-action="Detalhes" asp-route-id="@livro.Id" class="flex-shrink-0 text-decoration-none">
+                                @if (!string.IsNullOrEmpty(livro.FotoCapa))
+                                {
+                                    <img src="@livro.FotoCapa"
+                                         alt="Capa de @livro.Titulo"
+                                         class="rounded-3 shadow-sm object-fit-cover hover-scale"
+                                         style="width: 70px; height: 100px;"
+                                         onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'rounded-3 bg-light border d-flex align-items-center justify-content-center text-muted shadow-sm\' style=\'width: 70px; height: 100px; font-size: 1.6rem;\'>📖</div>';" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-3 bg-light border d-flex align-items-center justify-content-center text-muted shadow-sm hover-scale"
+                                         style="width: 70px; height: 100px; font-size: 1.6rem;">
+                                        📖
+                                    </div>
+                                }
+                            </a>
+
+                            <!-- Textos, Status e Avaliação sem cortar título -->
+                            <div class="flex-grow-1 min-w-0">
+                                <!-- Linha 1: Status e Estrelas com espaçamento garantido -->
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge rounded-pill px-2 py-1 extra-small fw-semibold @corStatus">
+                                        @livro.Status
+                                    </span>
+
+                                    @if (livro.Avaliacao.HasValue)
+                                    {
+                                        <span class="text-warning extra-small fw-bold text-nowrap ms-1" title="Nota: @livro.Avaliacao de 5">
+                                            @string.Concat(Enumerable.Repeat("★", livro.Avaliacao.Value))
+                                        </span>
+                                    }
+                                </div>
+
+                                <!-- Linha 2: Título com quebra automática em até 2 linhas -->
+                                <h6 class="fw-bold mb-1 lh-sm">
+                                    <a asp-action="Detalhes" asp-route-id="@livro.Id"
+                                       class="text-dark text-decoration-none"
+                                       style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
+                                       title="@livro.Titulo">
+                                        @livro.Titulo
+                                    </a>
+                                </h6>
+
+                                <!-- Linha 3: Autor -->
+                                <p class="text-muted extra-small mb-2 text-truncate">
+                                    @(string.IsNullOrEmpty(livro.Autor) ? "Autor não informado" : livro.Autor)
+                                </p>
+
+                                <!-- Linha 4: Categoria -->
+                                @if (!string.IsNullOrEmpty(livro.Categoria))
+                                {
+                                    <span class="badge bg-light text-secondary border extra-small">
+                                        @livro.Categoria
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Barra de Progresso Percentual -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-secondary extra-small fw-semibold">Progresso da Leitura</span>
+                                <span class="text-dark small fw-bold">@livro.PercentualLido%</span>
+                            </div>
+
+                            <div class="progress" role="progressbar" aria-label="Progresso" aria-valuenow="@livro.PercentualLido" aria-valuemin="0" aria-valuemax="100" style="height: 6px;">
+                                <div class="progress-bar @(livro.PercentualLido == 100 ? "bg-success" : (livro.Status == "Lendo" ? "bg-primary" : "bg-dark")) rounded-pill"
+                                     style="width: @(livro.PercentualLido)%"></div>
+                            </div>
+
+                            @if (livro.TotalPaginas > 0)
+                            {
+                                <div class="text-muted extra-small text-end mt-1">
+                                    @livro.PaginasLidas de @livro.TotalPaginas págs.
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Anotações (truncadas) -->
+                        @if (!string.IsNullOrEmpty(livro.Notas))
+                        {
+                            <p class="text-secondary small flex-grow-1 text-truncate mb-3" title="@livro.Notas">
+                                💬 @livro.Notas
+                            </p>
+                        }
+                        else
+                        {
+                            <div class="flex-grow-1"></div>
+                        }
+
+                        <!-- Rodapé: Link de Detalhes e Ações -->
+                        <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-auto">
+                            <a asp-action="Detalhes" asp-route-id="@livro.Id" class="btn btn-sm btn-link text-decoration-none text-dark fw-semibold ps-0">
+                                Ver detalhes →
+                            </a>
+
+                            <div class="d-flex gap-2">
+                                <a asp-action="Editar" asp-route-id="@livro.Id" class="btn btn-sm btn-light border rounded-pill px-3">
+                                    Editar
+                                </a>
+                                <form asp-action="Excluir" asp-route-id="@livro.Id" method="post" onsubmit="return confirm('Tem certeza que deseja remover este livro da biblioteca?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-light border text-danger rounded-pill px-3" title="Excluir">
+                                        ✕
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

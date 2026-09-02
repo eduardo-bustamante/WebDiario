@@ -1,0 +1,215 @@
+﻿@model WebDiario.Models.Livro
+
+@{
+    ViewData["Title"] = "Editar Livro";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <a asp-action="Index" class="btn btn-link text-muted text-decoration-none mb-3 ps-0">
+                ← Voltar para a biblioteca
+            </a>
+
+            <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-dark mb-1">Editar Livro</h2>
+                        <p class="text-muted small mb-0">Atualize o progresso, nota ou capa da obra.</p>
+                    </div>
+                    <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill">Edição</span>
+                </div>
+
+                <form asp-action="Editar" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- Preservação do registro original -->
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="DataCadastro" />
+                    <input type="hidden" asp-for="FotoCapa" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Título -->
+                    <div class="mb-3">
+                        <label asp-for="Titulo" class="form-label fw-semibold small text-uppercase text-secondary">Título *</label>
+                        <input asp-for="Titulo" class="form-control form-control-lg rounded-3 border-light-subtle" />
+                        <span asp-validation-for="Titulo" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Autor e Categoria -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Autor" class="form-label fw-semibold small text-uppercase text-secondary">Autor</label>
+                            <input asp-for="Autor" class="form-control rounded-3 border-light-subtle" />
+                            <span asp-validation-for="Autor" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Categoria" class="form-label fw-semibold small text-uppercase text-secondary">Gênero / Categoria</label>
+                            <input asp-for="Categoria" class="form-control rounded-3 border-light-subtle" />
+                            <span asp-validation-for="Categoria" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Status e Avaliação -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label fw-semibold small text-uppercase text-secondary">Status de Leitura</label>
+                            <select asp-for="Status" class="form-select rounded-3 border-light-subtle">
+                                <option value="Quero Ler">📌 Quero Ler</option>
+                                <option value="Lendo">📖 Lendo</option>
+                                <option value="Lido">✅ Lido</option>
+                                <option value="Abandonado">⏹ Abandonado</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Avaliacao" class="form-label fw-semibold small text-uppercase text-secondary">Avaliação</label>
+                            <select asp-for="Avaliacao" class="form-select rounded-3 border-light-subtle">
+                                <option value="">Sem nota</option>
+                                <option value="5">★★★★★ (5 - Excelente)</option>
+                                <option value="4">★★★★☆ (4 - Muito Bom)</option>
+                                <option value="3">★★★☆☆ (3 - Bom)</option>
+                                <option value="2">★★☆☆☆ (2 - Regular)</option>
+                                <option value="1">★☆☆☆☆ (1 - Ruim)</option>
+                            </select>
+                            <span asp-validation-for="Avaliacao" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Páginas (Controle de Progresso) -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="PaginasLidas" class="form-label fw-semibold small text-uppercase text-secondary">Páginas Lidas</label>
+                            <input asp-for="PaginasLidas" type="number" min="0" class="form-control rounded-3 border-light-subtle" />
+                            <span asp-validation-for="PaginasLidas" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TotalPaginas" class="form-label fw-semibold small text-uppercase text-secondary">Total de Páginas</label>
+                            <input asp-for="TotalPaginas" type="number" min="0" class="form-control rounded-3 border-light-subtle" />
+                            <span asp-validation-for="TotalPaginas" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Gerenciamento da Capa com Prévia -->
+                    <div class="card border bg-light-subtle rounded-4 p-3 mb-4">
+                        <label class="form-label fw-semibold small text-uppercase text-secondary mb-2">
+                            🖼 Capa do Livro
+                        </label>
+                        
+                        <div class="row g-3 align-items-center">
+                            <div class="col-sm-3 col-4 text-center">
+                                <div id="previewContainer" class="rounded-3 border bg-white d-flex align-items-center justify-content-center overflow-hidden shadow-sm mx-auto" 
+                                     style="width: 85px; height: 125px;">
+                                    @if (!string.IsNullOrEmpty(Model.FotoCapa))
+                                    {
+                                        <img id="previewImage" src="@Model.FotoCapa" alt="Capa Atual" class="w-100 h-100 object-fit-cover" />
+                                        <span id="previewPlaceholder" class="text-muted fs-2 d-none">📖</span>
+                                    }
+                                    else
+                                    {
+                                        <span id="previewPlaceholder" class="text-muted fs-2">📖</span>
+                                        <img id="previewImage" src="#" alt="Prévia da Capa" class="w-100 h-100 object-fit-cover d-none" />
+                                    }
+                                </div>
+                                <span class="extra-small text-muted d-block mt-1">Capa Atual / Prévia</span>
+                            </div>
+                            
+                            <div class="col-sm-9 col-8">
+                                @if (!string.IsNullOrEmpty(Model.FotoCapa))
+                                {
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="removerCapa" value="true" id="checkRemover">
+                                        <label class="form-check-label text-danger small" for="checkRemover">
+                                            Remover capa existente
+                                        </label>
+                                    </div>
+                                }
+
+                                <div class="mb-2">
+                                    <label class="form-label extra-small text-muted mb-1">Substituir por arquivo</label>
+                                    <input type="file" name="arquivoCapa" id="inputArquivo" class="form-control form-control-sm rounded-3" accept="image/*" />
+                                </div>
+                                <div>
+                                    <label class="form-label extra-small text-muted mb-1">Ou nova URL</label>
+                                    <input type="url" name="urlCapa" id="inputUrl" 
+                                           value="@(Model.FotoCapa?.StartsWith("http") == true ? Model.FotoCapa : "")" 
+                                           class="form-control form-control-sm rounded-3" placeholder="https://exemplo.com/capa.jpg" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Anotações / Reflexões -->
+                    <div class="mb-4">
+                        <label asp-for="Notas" class="form-label fw-semibold small text-uppercase text-secondary">Minhas Anotações / Reflexões</label>
+                        <textarea asp-for="Notas" rows="4" class="form-control rounded-3 border-light-subtle p-3"></textarea>
+                        <span asp-validation-for="Notas" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="d-flex justify-content-end align-items-center gap-3 pt-3 border-top">
+                        <a asp-action="Index" class="btn btn-light rounded-pill px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-dark rounded-pill px-5 shadow-sm">Salvar Alterações</button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const inputArquivo = document.getElementById('inputArquivo');
+        const inputUrl = document.getElementById('inputUrl');
+        const previewImage = document.getElementById('previewImage');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const checkRemover = document.getElementById('checkRemover');
+        const capaInicial = "@(Model.FotoCapa ?? "")";
+
+        function atualizarPreview(src) {
+            if (src) {
+                previewImage.src = src;
+                previewImage.classList.remove('d-none');
+                previewPlaceholder.classList.add('d-none');
+            } else {
+                previewImage.classList.add('d-none');
+                previewPlaceholder.classList.remove('d-none');
+            }
+        }
+
+        inputArquivo?.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => atualizarPreview(e.target.result);
+                reader.readAsDataURL(this.files[0]);
+                inputUrl.value = '';
+                if (checkRemover) checkRemover.checked = false;
+            }
+        });
+
+        inputUrl?.addEventListener('input', function () {
+            if (this.value.trim().length > 10) {
+                atualizarPreview(this.value.trim());
+                inputArquivo.value = '';
+                if (checkRemover) checkRemover.checked = false;
+            } else if (!inputArquivo.files.length) {
+                atualizarPreview(capaInicial);
+            }
+        });
+
+        checkRemover?.addEventListener('change', function () {
+            if (this.checked) {
+                atualizarPreview(null);
+                inputArquivo.value = '';
+                inputUrl.value = '';
+            } else {
+                atualizarPreview(capaInicial);
+            }
+        });
+    </script>
+}
