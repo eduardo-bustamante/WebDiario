@@ -249,7 +249,7 @@ public class LivrosController : Controller
         {
             livro.Status = "Lido";
         }
-        else if (livro.PaginasLidas > 0 && livro.Status == "Quero Ler")
+        else if (livro.PaginasLidas > 0 && (livro.Status == "Quero Ler" || livro.PaginasLidas < livro.TotalPaginas))
         {
             livro.Status = "Lendo";
         }

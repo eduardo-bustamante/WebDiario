@@ -53,10 +53,10 @@
                         <div class="col-md-4">
                             <label asp-for="Status" class="form-label fw-semibold small text-uppercase text-secondary">Status</label>
                             <select asp-for="Status" class="form-select rounded-3 border-light-subtle">
-                                <option value="Quero Ler">Quero Ler</option>
-                                <option value="Lendo">Lendo</option>
-                                <option value="Lido">Lido</option>
-                                <option value="Abandonado">Abandonado</option>
+                                <option value="Quero Ler">📌 Quero Ler</option>
+                                <option value="Lendo">📖 Lendo</option>
+                                <option value="Lido">✅ Lido</option>
+                                <option value="Abandonado">⏹ Abandonado</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -214,5 +214,32 @@
                 definirPreview(capaOriginal || null);
             }
         });
+        // Sincronização automática do Status pelas páginas digitadas
+const inputPaginasLidas = document.querySelector('input[name="PaginasLidas"]');
+const inputTotalPaginas = document.querySelector('input[name="TotalPaginas"]');
+const selectStatus = document.querySelector('select[name="Status"]');
+
+function sincronizarStatusPorPaginas() {
+    if (!inputPaginasLidas || !inputTotalPaginas || !selectStatus) return;
+
+    const lidas = parseInt(inputPaginasLidas.value, 10) || 0;
+    const total = parseInt(inputTotalPaginas.value, 10) || 0;
+
+    // Se completou todas as páginas
+    if (total > 0 && lidas >= total) {
+        selectStatus.value = 'Lido';
+    } 
+    // Se começou a ler mas ainda não terminou
+    else if (lidas > 0 && (selectStatus.value === 'Quero Ler' || lidas < total)) {
+        selectStatus.value = 'Lendo';
+    }
+    // Se zerou as páginas e estava como Lido/Lendo, volta para Quero Ler
+    else if (lidas === 0 && selectStatus.value === 'Lendo') {
+        selectStatus.value = 'Quero Ler';
+    }
+}
+
+inputPaginasLidas?.addEventListener('input', sincronizarStatusPorPaginas);
+inputTotalPaginas?.addEventListener('input', sincronizarStatusPorPaginas);
     </script>
 }
