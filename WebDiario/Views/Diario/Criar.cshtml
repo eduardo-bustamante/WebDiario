@@ -1,4 +1,4 @@
-﻿@model WebDiario.Models.EntradaDiario
+﻿@model WebDiario.Models.Diario
 
 @{
     ViewData["Title"] = "Nova Anotação";
@@ -7,62 +7,101 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            
+
             <a asp-action="Index" class="btn btn-link text-muted text-decoration-none mb-3 ps-0">
-                ← Voltar para as memórias
+                ← Voltar para o diário
             </a>
 
             <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
                 <div class="mb-4">
-                    <h2 class="fw-bold text-dark mb-1">O que está na sua mente hoje?</h2>
-                    <p class="text-muted small">Reserve um instante para registrar suas ideias.</p>
+                    <h2 class="fw-bold text-dark mb-1">Como foi o seu dia?</h2>
+                    <p class="text-muted small mb-0">Reserve alguns minutos para registrar suas reflexões e acolher seus sentimentos.</p>
                 </div>
 
                 <form asp-action="Criar" method="post">
+                    @Html.AntiForgeryToken()
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                    <!-- Título -->
-                    <div class="mb-4">
-                        <label asp-for="Titulo" class="form-label fw-semibold text-secondary small text-uppercase">Título</label>
-                        <input asp-for="Titulo" class="form-control form-control-lg rounded-3 border-light-subtle" placeholder="Ex: Ideias para o projeto, Um dia incrível..." />
-                        <span asp-validation-for="Titulo" class="text-danger small"></span>
-                    </div>
-
-                    <!-- Data e Humor -->
+                    <!-- Título e Data -->
                     <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label asp-for="DataCriacao" class="form-label fw-semibold text-secondary small text-uppercase">Data</label>
-                            <input asp-for="DataCriacao" type="date" class="form-control rounded-3 border-light-subtle" />
-                            <span asp-validation-for="DataCriacao" class="text-danger small"></span>
+                        <div class="col-md-8">
+                            <label asp-for="Titulo" class="form-label fw-semibold small text-uppercase text-secondary">Título *</label>
+                            <input asp-for="Titulo" class="form-control form-control-lg rounded-3 border-light-subtle" placeholder="Ex: Um dia de recomeço e calma..." />
+                            <span asp-validation-for="Titulo" class="text-danger small"></span>
                         </div>
-                        <div class="col-md-6">
-                            <label asp-for="Humor" class="form-label fw-semibold text-secondary small text-uppercase">Como você se sente?</label>
-                            <select asp-for="Humor" class="form-select rounded-3 border-light-subtle">
-                                <option value="😊 Feliz / Realizado">😊 Feliz / Realizado</option>
-                                <option value="🚀 Produtivo / Focado">🚀 Produtivo / Focado</option>
-                                <option value="🤔 Reflexivo / Calmo">🤔 Reflexivo / Calmo</option>
-                                <option value="😴 Cansado / Relaxando">😴 Cansado / Relaxando</option>
-                                <option value="⚡ Ansioso / Preocupado">⚡ Ansioso / Preocupado</option>
-                            </select>
+                        <div class="col-md-4">
+                            <label asp-for="DataRegistro" class="form-label fw-semibold small text-uppercase text-secondary">Data do Registro</label>
+                            <input asp-for="DataRegistro" type="date" class="form-control form-control-lg rounded-3 border-light-subtle" />
+                            <span asp-validation-for="DataRegistro" class="text-danger small"></span>
                         </div>
                     </div>
 
-                    <!-- Conteúdo Principal -->
+                    <!-- Escala de Humor Interativa -->
                     <div class="mb-4">
-                        <label asp-for="Conteudo" class="form-label fw-semibold text-secondary small text-uppercase">Pensamentos & Detalhes</label>
-                        <textarea asp-for="Conteudo" rows="9" class="form-control rounded-3 border-light-subtle p-3" 
-                                  placeholder="Escreva livremente aqui..."></textarea>
+                        <label class="form-label fw-semibold small text-uppercase text-secondary d-block mb-3">
+                            Como você está se sentindo hoje?
+                        </label>
+
+                        <div class="d-flex flex-wrap gap-2 justify-content-between">
+                            <input type="radio" class="btn-check" name="NivelHumor" id="humor1" value="1" @(Model.NivelHumor == 1 ? "checked" : "")>
+                            <label class="btn btn-outline-danger mood-item rounded-4 p-3 text-center flex-grow-1" for="humor1">
+                                <span class="fs-2 d-block mb-1">😫</span>
+                                <strong class="d-block small">Muito Difícil</strong>
+                                <span class="extra-small text-muted">Nível 1</span>
+                            </label>
+
+                            <input type="radio" class="btn-check" name="NivelHumor" id="humor2" value="2" @(Model.NivelHumor == 2 ? "checked" : "")>
+                            <label class="btn btn-outline-warning mood-item rounded-4 p-3 text-center flex-grow-1" for="humor2">
+                                <span class="fs-2 d-block mb-1">🙁</span>
+                                <strong class="d-block small">Para Baixo</strong>
+                                <span class="extra-small text-muted">Nível 2</span>
+                            </label>
+
+                            <input type="radio" class="btn-check" name="NivelHumor" id="humor3" value="3" @(Model.NivelHumor == 3 ? "checked" : "")>
+                            <label class="btn btn-outline-secondary mood-item rounded-4 p-3 text-center flex-grow-1" for="humor3">
+                                <span class="fs-2 d-block mb-1">😐</span>
+                                <strong class="d-block small">Neutro</strong>
+                                <span class="extra-small text-muted">Nível 3</span>
+                            </label>
+
+                            <input type="radio" class="btn-check" name="NivelHumor" id="humor4" value="4" @(Model.NivelHumor == 4 ? "checked" : "")>
+                            <label class="btn btn-outline-info mood-item rounded-4 p-3 text-center flex-grow-1" for="humor4">
+                                <span class="fs-2 d-block mb-1">🙂</span>
+                                <strong class="d-block small">Bem</strong>
+                                <span class="extra-small text-muted">Nível 4</span>
+                            </label>
+
+                            <input type="radio" class="btn-check" name="NivelHumor" id="humor5" value="5" @(Model.NivelHumor == 5 ? "checked" : "")>
+                            <label class="btn btn-outline-success mood-item rounded-4 p-3 text-center flex-grow-1" for="humor5">
+                                <span class="fs-2 d-block mb-1">🤩</span>
+                                <strong class="d-block small">Excelente</strong>
+                                <span class="extra-small text-muted">Nível 5</span>
+                            </label>
+                        </div>
+                        <span asp-validation-for="NivelHumor" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Conteúdo -->
+                    <div class="mb-4">
+                        <label asp-for="Conteudo" class="form-label fw-semibold small text-uppercase text-secondary">Conteúdo da Anotação *</label>
+                        <textarea asp-for="Conteudo" rows="8" class="form-control rounded-3 border-light-subtle p-3 lh-base"
+                                  placeholder="Escreva livremente o que você viveu, sentiu ou aprendeu hoje..."></textarea>
                         <span asp-validation-for="Conteudo" class="text-danger small"></span>
                     </div>
 
-                    <!-- Botões -->
+                    <!-- Botões de Ação -->
                     <div class="d-flex justify-content-end align-items-center gap-3 pt-3 border-top">
                         <a asp-action="Index" class="btn btn-light rounded-pill px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-dark rounded-pill px-5 shadow-sm">Guardar Registro</button>
+                        <button type="submit" class="btn btn-relax-primary px-5 shadow-sm">Salvar Registro</button>
                     </div>
+
                 </form>
             </div>
 
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

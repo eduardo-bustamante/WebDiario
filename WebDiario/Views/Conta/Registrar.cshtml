@@ -1,47 +1,71 @@
-﻿@model WebDiario.Models.RegistroViewModel
-@{
+﻿@{
     ViewData["Title"] = "Criar Conta";
 }
 
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
-                <div class="text-center mb-4">
-                    <div class="fs-1 mb-2">🔐</div>
-                    <h3 class="fw-bold text-dark">Criar Conta</h3>
-                    <p class="text-muted small">Crie seu acesso pessoal para guardar suas memórias.</p>
-                </div>
+        <div class="col-md-6 col-lg-5">
 
+            <div class="text-center mb-4">
+                <span class="fs-1">📖</span>
+                <h2 class="fw-bold text-dark mt-2 mb-1">Abra sua primeira página</h2>
+                <p class="text-muted small">Crie um usuário para guardar suas ideias com privacidade.</p>
+            </div>
+
+            <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
                 <form asp-action="Registrar" method="post">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small rounded-3 mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Usuario" class="form-label fw-semibold small text-secondary">Usuário</label>
-                        <input asp-for="Usuario" class="form-control rounded-3" placeholder="Usuário" />
-                        <span asp-validation-for="Usuario" class="text-danger small"></span>
+                        <label for="usuario" class="form-label fw-semibold small text-uppercase text-secondary">Nome de Usuário</label>
+                        <input type="text"
+                               id="usuario"
+                               name="usuario"
+                               class="form-control rounded-3 border-light-subtle py-2"
+                               placeholder="Ex: marcos, ana_leitora"
+                               required
+                               autofocus />
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Senha" class="form-label fw-semibold small text-secondary">Senha</label>
-                        <input asp-for="Senha" class="form-control rounded-3" placeholder="Mínimo 6 dígitos" />
-                        <span asp-validation-for="Senha" class="text-danger small"></span>
+                        <label for="password" class="form-label fw-semibold small text-uppercase text-secondary">Senha</label>
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="form-control rounded-3 border-light-subtle py-2"
+                               placeholder="Mínimo 6 caracteres"
+                               required />
                     </div>
 
                     <div class="mb-4">
-                        <label asp-for="ConfirmarSenha" class="form-label fw-semibold small text-secondary">Confirmar Senha</label>
-                        <input asp-for="ConfirmarSenha" class="form-control rounded-3" placeholder="Repita a senha" />
-                        <span asp-validation-for="ConfirmarSenha" class="text-danger small"></span>
+                        <label for="confirmPassword" class="form-label fw-semibold small text-uppercase text-secondary">Confirmar Senha</label>
+                        <input type="password"
+                               id="confirmPassword"
+                               name="confirmPassword"
+                               class="form-control rounded-3 border-light-subtle py-2"
+                               placeholder="Repita a senha"
+                               required />
                     </div>
 
-                    <button type="submit" class="btn btn-dark rounded-pill w-100 py-2 shadow-sm mb-3">Cadastrar</button>
+                    <button type="submit" class="btn btn-relax-primary w-100 py-2 rounded-pill shadow-sm mb-3">
+                        Concluir Cadastro
+                    </button>
 
                     <div class="text-center">
                         <span class="text-muted small">Já possui uma conta?</span>
-                        <a asp-action="Login" class="text-dark fw-semibold small text-decoration-none ms-1">Entrar</a>
+                        <a asp-action="Login" class="small fw-semibold text-decoration-none" style="color: var(--sage-primary);">
+                            Fazer login
+                        </a>
                     </div>
                 </form>
             </div>
+
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

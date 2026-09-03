@@ -1,60 +1,186 @@
 ﻿@{
-    ViewData["Title"] = "Bem-vindo ao Diário";
+    ViewData["Title"] = "Início";
+    var estaLogado = User.Identity?.IsAuthenticated == true;
+    var nomeUsuario = estaLogado ? (User.Identity?.Name ?? "Amigo") : "";
 }
 
-<div class="container py-4">
-    <!-- Bloco Hero de Apresentação -->
-    <div class="row align-items-center py-5 rounded-4 p-4 p-md-5 mb-5" style="background-color: #f8f9fa;">
-        <div class="col-lg-6 mb-4 mb-lg-0 pe-lg-4">
-            <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill mb-3 fw-medium">
-                Reflexão
-            </span>
-            <h1 class="display-5 fw-bold text-dark lh-sm mb-3">
-                Um espaço diário para organizar ideias e sentimentos.
-            </h1>
-            <p class="lead text-muted mb-4">
-                Um diário digital minimalista, seguro e direto ao ponto. Registre momentos marcantes, acompanhe a evolução do seu humor e construa o hábito diário da escrita.
-            </p>
-            <div class="d-flex flex-wrap gap-3">
-                <a asp-controller="Diario" asp-action="Index" class="btn btn-dark btn-lg px-4 rounded-pill">
-                    Abrir Meu Diário
-                </a>
-                <a asp-controller="Diario" asp-action="Criar" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">
-                    Criar Primeiro Registro
-                </a>
-            </div>
-        </div>
+<div class="py-4">
+    @if (estaLogado)
+    {
+        <!-- ========================================== -->
+        <!-- VISÃO PARA USUÁRIO AUTENTICADO (DASHBOARD) -->
+        <!-- ========================================== -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
 
-        <div class="col-lg-6 text-center">
-            <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=900&q=80" 
-                 alt="Caderno aberto com caneta em uma mesa organizada" 
-                 class="img-fluid rounded-4 shadow" 
-                 style="max-height: 420px; width: 100%; object-fit: cover;" />
-        </div>
-    </div>
+                <!-- Boas-vindas do dia -->
+                <div class="card border-0 rounded-4 p-4 p-md-5 mb-4 shadow-sm"
+                     style="background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%); color: #ffffff;">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <span class="badge rounded-pill px-3 py-2 mb-3" style="background-color: rgba(255,255,255,0.18); font-weight: 500;">
+                                🌿 Seu santuário de reflexão e leitura
+                            </span>
+                            <h1 class="display-6 fw-bold mb-2">Bem-vindo de volta, @nomeUsuario!</h1>
+                            <p class="lead opacity-90 mb-4" style="font-size: 1.05rem;">
+                                Como foi o seu dia até aqui? Reserve alguns minutos para acalmar a mente, anotar suas ideias ou atualizar a leitura do seu livro.
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a asp-controller="Diario" asp-action="Criar" class="btn btn-light rounded-pill px-4 fw-semibold text-success shadow-sm">
+                                    ✍️ Escrever no Diário
+                                </a>
+                                <a asp-controller="Livros" asp-action="Index" class="btn btn-outline-light rounded-pill px-4">
+                                    📚 Minha Estante
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center d-none d-md-block">
+                            <span style="font-size: 5.5rem; opacity: 0.9;">📖</span>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Destaques do Sistema -->
-    <div class="row g-4 text-center mt-2">
-        <div class="col-md-4">
-            <div class="p-4 border rounded-3 bg-white h-100 shadow-sm">
-                <div class="fs-1 mb-2">✍️</div>
-                <h5 class="fw-semibold text-dark">Escrita Livre</h5>
-                <p class="text-muted small mb-0">Registre seus dias sem distrações, salvando seus pensamentos mais sinceros em um só lugar.</p>
+                <!-- Acesso aos Dois Módulos Principais -->
+                <div class="row g-4 mb-4">
+
+                    <!-- Card Módulo Diário -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border rounded-4 bg-white shadow-sm p-4 hover-scale transition-all">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center"
+                                     style="background-color: var(--sage-subtle); color: var(--sage-primary); width: 60px; height: 60px; font-size: 1.8rem;">
+                                    📓
+                                </div>
+                                <div>
+                                    <h4 class="fw-bold text-dark mb-0">Diário Pessoal</h4>
+                                    <span class="text-muted extra-small">Registros, memórias & escala emocional</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small flex-grow-1">
+                                Guarde pensamentos, ideias e monitore seu estado de humor ao longo do tempo com a escala de bem-estar.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                                <a asp-controller="Diario" asp-action="Index" class="btn btn-link text-decoration-none text-dark fw-semibold ps-0">
+                                    Ver todas as memórias →
+                                </a>
+                                <a asp-controller="Diario" asp-action="Criar" class="btn btn-sm btn-light border rounded-pill px-3">
+                                    + Nova anotação
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Módulo Livros -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border rounded-4 bg-white shadow-sm p-4 hover-scale transition-all">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-4 p-3 d-flex align-items-center justify-content-center"
+                                     style="background-color: #e0f2fe; color: #0369a1; width: 60px; height: 60px; font-size: 1.8rem;">
+                                    📚
+                                </div>
+                                <div>
+                                    <h4 class="fw-bold text-dark mb-0">Biblioteca & Leituras</h4>
+                                    <span class="text-muted extra-small">Acervo, capas e progresso</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small flex-grow-1">
+                                Catalogue seus livros físicos e digitais, acompanhe a porcentagem de páginas lidas e registre suas notas e citações favoritas.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                                <a asp-controller="Livros" asp-action="Index" class="btn btn-link text-decoration-none text-dark fw-semibold ps-0">
+                                    Abrir estante →
+                                </a>
+                                <a asp-controller="Livros" asp-action="Criar" class="btn btn-sm btn-light border rounded-pill px-3">
+                                    + Novo livro
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Citação Inspiradora do Dia -->
+                <div class="card border rounded-4 bg-white shadow-sm p-4 text-center">
+                    <figure class="mb-0">
+                        <blockquote class="blockquote mb-2">
+                            <p class="fs-6 fst-italic text-secondary">
+                                “Um livro é um dispositivo para acender a imaginação; um diário, o espelho que acolhe os passos do viajante.”
+                            </p>
+                        </blockquote>
+                        <figcaption class="blockquote-footer mb-0 small text-muted">
+                            Hábito diário de cultivo e aprendizado
+                        </figcaption>
+                    </figure>
+                </div>
+
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="p-4 border rounded-3 bg-white h-100 shadow-sm">
-                <div class="fs-1 mb-2">🎯</div>
-                <h5 class="fw-semibold text-dark">Acompanhamento de Humor</h5>
-                <p class="text-muted small mb-0">Classifique o estado de espírito de cada dia e observe seus padrões de bem-estar ao longo do tempo.</p>
+    }
+    else
+    {
+        <!-- ============================================== -->
+        <!-- VISÃO PARA VISITANTE NÃO AUTENTICADO (LANDING) -->
+        <!-- ============================================== -->
+        <div class="row justify-content-center py-4">
+            <div class="col-lg-9 text-center">
+
+                <div class="mb-3">
+                    <span class="badge brand-badge rounded-pill px-3 py-2 fs-6">
+                        🌿 Seu espaço calmo e privativo
+                    </span>
+                </div>
+
+                <h1 class="display-4 fw-bold text-dark mb-3 tracking-tight">
+                    Um refúgio para suas ideias e leituras.
+                </h1>
+
+                <p class="lead text-muted mx-auto mb-4" style="max-width: 650px;">
+                    O <strong>Página Aberta</strong> une o registro das suas memórias com a catalogação da sua estante de livros, oferecendo um ambiente relaxante e protegido para o seu dia a dia.
+                </p>
+
+                <div class="d-flex justify-content-center gap-3 mb-5">
+                    <a asp-controller="Conta" asp-action="Registrar" class="btn btn-relax-primary btn-lg px-4 rounded-pill shadow-sm">
+                        Começar gratuitamente
+                    </a>
+                    <a asp-controller="Conta" asp-action="Login" class="btn btn-light border btn-lg px-4 rounded-pill text-secondary">
+                        Acessar minha conta
+                    </a>
+                </div>
+
+                <!-- Três Destaques em Cartões -->
+                <div class="row g-4 text-start mt-2">
+                    <div class="col-md-4">
+                        <div class="card h-100 border rounded-4 bg-white p-4 shadow-sm">
+                            <div class="fs-1 mb-2">✍️</div>
+                            <h5 class="fw-bold text-dark">Diário com Humor</h5>
+                            <p class="text-muted small mb-0">
+                                Escreva livremente sobre suas vivências e acompanhe suas oscilações com a escala de humor interativa.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card h-100 border rounded-4 bg-white p-4 shadow-sm">
+                            <div class="fs-1 mb-2">📚</div>
+                            <h5 class="fw-bold text-dark">Catálogo de Livros</h5>
+                            <p class="text-muted small mb-0">
+                                Organize sua estante com fotos de capa, avaliações em estrelas e barra de páginas concluídas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card h-100 border rounded-4 bg-white p-4 shadow-sm">
+                            <div class="fs-1 mb-2">🔒</div>
+                            <h5 class="fw-bold text-dark">Privacidade Total</h5>
+                            <p class="text-muted small mb-0">
+                                Seus registros são isolados e protegidos por autenticação segura, acessíveis apenas por você.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="p-4 border rounded-3 bg-white h-100 shadow-sm">
-                <div class="fs-1 mb-2">🔒</div>
-                <h5 class="fw-semibold text-dark">Armazenamento Local</h5>
-                <p class="text-muted small mb-0">Seus dados ficam estruturados no banco de dados SqlServer, com total integridade e simplicidade de backup.</p>
-            </div>
-        </div>
-    </div>
+    }
 </div>

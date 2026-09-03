@@ -1,108 +1,103 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebDiario.Models;
 
 namespace WebDiario.Controllers;
 
 public class ContaController : Controller
 {
-    private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly UserManager<IdentityUser> _userManager;
 
-    public ContaController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+    public ContaController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
     {
-        _userManager = userManager;
         _signInManager = signInManager;
+        _userManager = userManager;
     }
 
-    // ==========================================
-    // REGISTRO
-    // ==========================================
-    [HttpGet]
-    [AllowAnonymous]
-    public IActionResult Registrar()
-    {
-        if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Index", "Diario");
-
-        return View();
-    }
-
-    [HttpPost]
-    [AllowAnonymous]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Registrar(RegistroViewModel model)
-    {
-        if (!ModelState.IsValid)
-            return View(model);
-
-        var usuario = new IdentityUser
-        {
-            UserName = model.Usuario.Trim()
-            // Email = null (ou nem precisa preencher se não for usar)
-        };
-        var resultado = await _userManager.CreateAsync(usuario, model.Senha);
-
-        if (resultado.Succeeded)
-        {
-            // Efetua o login logo após o cadastro
-            await _signInManager.SignInAsync(usuario, isPersistent: false);
-            return RedirectToAction("Index", "Diario");
-        }
-
-        foreach (var erro in resultado.Errors)
-        {
-            ModelState.AddModelError(string.Empty, erro.Description);
-        }
-
-        return View(model);
-    }
-
-    // ==========================================
-    // LOGIN
-    // ==========================================
+    // GET: /Conta/Login
     [HttpGet]
     [AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
     {
-        if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Index", "Diario");
-
-        return View(new LoginViewModel { ReturnUrl = returnUrl });
+        ViewData["ReturnUrl"] = returnUrl;
+        return View();
     }
 
+    // POST: /Conta/Login
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    public async Task<IActionResult> Login(string usuario, string password, bool rememberMe, string? returnUrl = null)
     {
-        if (!ModelState.IsValid)
-            return View(model);
+        ViewData["ReturnUrl"] = returnUrl;
 
-        var resultado = await _signInManager.PasswordSignInAsync(
-            model.Usuario,
-            model.Senha,
-            model.LembrarMe,
-            lockoutOnFailure: false);
-
-        if (resultado.Succeeded)
+        if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(password))
         {
-            if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                return Redirect(model.ReturnUrl);
-
-            return RedirectToAction("Index", "Diario");
+            ModelState.AddModelError(string.Empty, "Preencha o usuário e a senha.");
+            return View();
         }
 
-        ModelState.AddModelError(string.Empty, "E-mail ou senha inválidos.");
-        return View(model);
+        var result = await _signInManager.PasswordSignInAsync(usuario.Trim(), password, rememberMe, lockoutOnFailure: false);
+        if (result.Succeeded)
+        {
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
+        ModelState.AddModelError(string.Empty, "Usuário ou senha incorretos.");
+        return View();
     }
 
-    // ==========================================
-    // LOGOUT
-    // ==========================================
+    // GET: /Conta/Registrar
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult Registrar()
+    {
+        return View();
+    }
+
+    // POST: /Conta/Registrar
     [HttpPost]
+    [AllowAnonymous]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Registrar(string usuario, string password, string confirmPassword)
+    {
+        if (string.IsNullOrWhiteSpace(usuario))
+        {
+            ModelState.AddModelError(string.Empty, "Informe um nome de usuário.");
+            return View();
+        }
+
+        if (password != confirmPassword)
+        {
+            ModelState.AddModelError(string.Empty, "As senhas informadas não conferem.");
+            return View();
+        }
+
+        var user = new IdentityUser { UserName = usuario.Trim() };
+        var result = await _userManager.CreateAsync(user, password);
+
+        if (result.Succeeded)
+        {
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            return RedirectToAction("Index", "Home");
+        }
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
+
+        return View();
+    }
+
+    // POST / GET: /Conta/Sair
+    [HttpPost, HttpGet]
+    [Authorize]
     public async Task<IActionResult> Sair()
     {
         await _signInManager.SignOutAsync();

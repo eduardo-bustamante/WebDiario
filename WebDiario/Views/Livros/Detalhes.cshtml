@@ -7,26 +7,26 @@
     {
         "Lendo" => "bg-primary-subtle text-primary border border-primary-subtle",
         "Lido" => "bg-success-subtle text-success border border-success-subtle",
-        "Quero Ler" => "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
+        "Quero Ler" => "bg-secondary-subtle text-secondary border border-secondary-subtle",
         "Abandonado" => "bg-danger-subtle text-danger border border-danger-subtle",
-        _ => "bg-secondary-subtle text-secondary border border-secondary-subtle"
+        _ => "bg-light text-dark"
     };
 }
 
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-9">
-            
-            <!-- Barra Superior de Ações -->
+        <div class="col-lg-8">
+
+            <!-- Barra Superior com Ações -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <a asp-action="Index" class="btn btn-link text-muted text-decoration-none ps-0">
-                    ← Voltar para a biblioteca
+                    ← Voltar para a estante
                 </a>
                 <div class="d-flex gap-2">
                     <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                        Editar Livro
+                        Editar
                     </a>
-                    <form asp-action="Excluir" asp-route-id="@Model.Id" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este livro?');">
+                    <form asp-action="Excluir" asp-route-id="@Model.Id" method="post" class="d-inline" onsubmit="return confirm('Deseja excluir este livro da estante?');">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                             Excluir
@@ -37,97 +37,88 @@
 
             <!-- Card Principal -->
             <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
-                <div class="row g-4 align-items-start">
-                    
-                    <!-- Coluna da Esquerda: Capa Ampliada -->
-                    <div class="col-md-4 text-center">
-                        <div class="rounded-4 overflow-hidden shadow-sm border mx-auto bg-light d-flex align-items-center justify-content-center" 
-                             style="max-width: 220px; aspect-ratio: 2/3;">
-                            @if (!string.IsNullOrEmpty(Model.FotoCapa))
-                            {
-                                <img src="@Model.FotoCapa" 
-                                     alt="Capa de @Model.Titulo" 
-                                     class="w-100 h-100 object-fit-cover" 
-                                     onerror="this.onerror=null;this.parentElement.innerHTML='<span class=\'display-1 text-muted\'>📖</span>';" />
-                            }
-                            else
-                            {
-                                <span class="display-1 text-muted">📖</span>
-                            }
-                        </div>
+                <div class="row g-4 mb-4">
 
-                        <!-- Data de Cadastro -->
-                        <span class="text-muted extra-small d-block mt-3">
-                            Catalogado em @Model.DataCadastro.ToString("dd 'de' MMMM 'de' yyyy")
-                        </span>
+                    <!-- Capa -->
+                    <div class="col-sm-4 text-center">
+                        @if (!string.IsNullOrEmpty(Model.FotoCapa))
+                        {
+                            <img src="@Model.FotoCapa"
+                                 alt="Capa de @Model.Titulo"
+                                 class="img-fluid rounded-3 shadow border bg-white"
+                                 style="max-height: 250px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-3 bg-light border d-flex align-items-center justify-content-center text-muted shadow-sm mx-auto"
+                                 style="width: 150px; height: 210px; font-size: 3rem;">
+                                📖
+                            </div>
+                        }
                     </div>
 
-                    <!-- Coluna da Direita: Informações Detalhadas -->
-                    <div class="col-md-8">
-                        
-                        <!-- Badges e Avaliação -->
-                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                            <span class="badge rounded-pill px-3 py-2 fw-semibold @corStatus">
+                    <!-- Dados Principais -->
+                    <div class="col-sm-8">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge rounded-pill px-3 py-1 extra-small fw-semibold @corStatus">
                                 @Model.Status
                             </span>
-
-                            @if (!string.IsNullOrEmpty(Model.Categoria))
-                            {
-                                <span class="badge bg-light text-secondary border rounded-pill px-3 py-2">
-                                    🏷️ @Model.Categoria
-                                </span>
-                            }
-
                             @if (Model.Avaliacao.HasValue)
                             {
-                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2 fw-bold">
-                                    @string.Concat(Enumerable.Repeat("★", Model.Avaliacao.Value)) (@Model.Avaliacao de 5)
+                                <span class="text-warning fw-bold fs-6">
+                                    @string.Concat(Enumerable.Repeat("★", Model.Avaliacao.Value))
                                 </span>
                             }
                         </div>
 
-                        <!-- Título e Autor -->
-                        <h1 class="h2 fw-bold text-dark mb-2">@Model.Titulo</h1>
-                        <p class="text-muted fs-6 mb-4">
-                            por <strong class="text-dark">@(string.IsNullOrEmpty(Model.Autor) ? "Autor não informado" : Model.Autor)</strong>
-                        </p>
+                        <h2 class="h3 fw-bold text-dark mb-1">@Model.Titulo</h2>
+                        <p class="text-muted fs-6 mb-3">@(string.IsNullOrEmpty(Model.Autor) ? "Autor não informado" : Model.Autor)</p>
 
-                        <!-- Box de Progresso da Leitura -->
-                        <div class="bg-light border rounded-4 p-3 mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-semibold text-secondary small text-uppercase">Progresso da Leitura</span>
+                        @if (!string.IsNullOrEmpty(Model.Categoria))
+                        {
+                            <span class="badge bg-light text-secondary border mb-3">
+                                @Model.Categoria
+                            </span>
+                        }
+
+                        <!-- Progresso -->
+                        <div class="card bg-light border-0 rounded-3 p-3 mt-2">
+                            <div class="d-flex justify-content-between align-items-center extra-small mb-1">
+                                <span class="text-muted fw-semibold">Progresso da Leitura</span>
                                 <span class="fw-bold text-dark">@Model.PercentualLido%</span>
                             </div>
-                            
-                            <div class="progress" role="progressbar" style="height: 10px;">
-                                <div class="progress-bar @(Model.PercentualLido == 100 ? "bg-success" : (Model.Status == "Lendo" ? "bg-primary" : "bg-dark")) rounded-pill" 
-                                     style="width: @(Model.PercentualLido)%"></div>
+                            <div class="progress mb-2" style="height: 8px;">
+                                <div class="progress-bar bg-primary rounded-pill"
+                                     role="progressbar"
+                                     style="width: @Model.PercentualLido%;"
+                                     aria-valuenow="@Model.PercentualLido"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"></div>
                             </div>
-
-                            <div class="d-flex justify-content-between text-muted extra-small mt-2">
-                                <span>Páginas lidas: <strong>@Model.PaginasLidas</strong></span>
-                                <span>Total: <strong>@(Model.TotalPaginas > 0 ? Model.TotalPaginas.ToString() : "Não informado")</strong></span>
-                            </div>
-                        </div>
-
-                        <!-- Anotações / Reflexões -->
-                        <div>
-                            <h6 class="fw-bold text-secondary text-uppercase small mb-2">Minhas Anotações & Lições</h6>
-                            @if (!string.IsNullOrWhiteSpace(Model.Notas))
+                            @if (Model.TotalPaginas > 0)
                             {
-                                <div class="bg-light-subtle border rounded-3 p-3 text-dark lh-lg" style="white-space: pre-line;">
-                                    @Model.Notas
+                                <div class="text-muted extra-small text-end">
+                                    @Model.PaginasLidas de @Model.TotalPaginas páginas lidas
                                 </div>
                             }
-                            else
-                            {
-                                <p class="text-muted small fst-italic mb-0">
-                                    Nenhuma reflexão ou nota registrada ainda para este livro.
-                                </p>
-                            }
                         </div>
-
                     </div>
+
+                </div>
+
+                <!-- Resenha e Notas -->
+                @if (!string.IsNullOrEmpty(Model.Notas))
+                {
+                    <div class="pt-4 border-top">
+                        <h5 class="fw-bold text-dark mb-2">Notas & Resenha Pessoal</h5>
+                        <div class="text-secondary lh-base" style="white-space: pre-line;">
+                            @Model.Notas
+                        </div>
+                    </div>
+                }
+
+                <div class="pt-3 border-top text-muted extra-small text-end mt-4">
+                    Cadastrado em @Model.DataCadastro.ToString("dd/MM/yyyy")
                 </div>
             </div>
 

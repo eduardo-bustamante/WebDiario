@@ -1,48 +1,69 @@
-﻿@model WebDiario.Models.LoginViewModel
-
-@{
+﻿@{
     ViewData["Title"] = "Entrar";
+    var returnUrl = ViewData["ReturnUrl"] as string;
 }
 
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
-                <div class="text-center mb-4">
-                    <div class="fs-1 mb-2">📖</div>
-                    <h3 class="fw-bold text-dark">Acessar Diário</h3>
-                    <p class="text-muted small">Digite suas credenciais para continuar.</p>
-                </div>
+        <div class="col-md-6 col-lg-5">
 
-                <form asp-action="Login" method="post">
-                    <input type="hidden" asp-for="ReturnUrl" />
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+            <div class="text-center mb-4">
+                <span class="fs-1">🌿</span>
+                <h2 class="fw-bold text-dark mt-2 mb-1">Bem-vindo de volta</h2>
+                <p class="text-muted small">Acesse o seu refúgio pessoal de reflexões e leituras.</p>
+            </div>
+
+            <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
+                <form asp-action="Login" asp-route-returnUrl="@returnUrl" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small rounded-3 mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Usuario" class="form-label fw-semibold small text-secondary">E-mail</label>
-                        <input asp-for="Usuario" class="form-control rounded-3" placeholder="seu@email.com" />
-                        <span asp-validation-for="Usuario" class="text-danger small"></span>
+                        <label for="usuario" class="form-label fw-semibold small text-uppercase text-secondary">Usuário</label>
+                        <input type="text"
+                               id="usuario"
+                               name="usuario"
+                               class="form-control rounded-3 border-light-subtle py-2"
+                               placeholder="Seu nome de usuário"
+                               required
+                               autofocus />
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Senha" class="form-label fw-semibold small text-secondary">Senha</label>
-                        <input asp-for="Senha" class="form-control rounded-3" placeholder="Sua senha" />
-                        <span asp-validation-for="Senha" class="text-danger small"></span>
+                        <label for="password" class="form-label fw-semibold small text-uppercase text-secondary">Senha</label>
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="form-control rounded-3 border-light-subtle py-2"
+                               placeholder="••••••••"
+                               required />
                     </div>
 
                     <div class="form-check mb-4">
-                        <input class="form-check-input" type="checkbox" asp-for="LembrarMe" />
-                        <label class="form-check-label text-muted small" asp-for="LembrarMe"></label>
+                        <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe" value="true">
+                        <label class="form-check-label small text-muted" for="rememberMe">
+                            Lembrar deste dispositivo
+                        </label>
                     </div>
 
-                    <button type="submit" class="btn btn-dark rounded-pill w-100 py-2 shadow-sm mb-3">Entrar</button>
+                    <button type="submit" class="btn btn-relax-primary w-100 py-2 rounded-pill shadow-sm mb-3">
+                        Entrar na Minha Conta
+                    </button>
 
                     <div class="text-center">
                         <span class="text-muted small">Ainda não tem conta?</span>
-                        <a asp-action="Registrar" class="text-dark fw-semibold small text-decoration-none ms-1">Criar agora</a>
+                        <a asp-action="Registrar" class="small fw-semibold text-decoration-none" style="color: var(--sage-primary);">
+                            Criar conta agora
+                        </a>
                     </div>
                 </form>
             </div>
+
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

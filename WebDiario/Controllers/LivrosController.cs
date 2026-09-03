@@ -19,14 +19,13 @@ public class LivrosController : Controller
         _env = env;
     }
 
-    // Identificador único do usuário autenticado no Identity
     private string ObterUsuarioIdLogado()
     {
         return User.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? throw new InvalidOperationException("Usuário não autenticado.");
     }
 
-    // GET: /Livros ou /Livros/Index
+    // GET: /Livros
     public async Task<IActionResult> Index(string? busca, string? status)
     {
         var usuarioId = ObterUsuarioIdLogado();
@@ -79,7 +78,6 @@ public class LivrosController : Controller
         {
             livro.UsuarioId = ObterUsuarioIdLogado();
 
-            // Processa upload ou link externo
             if (arquivoCapa != null && arquivoCapa.Length > 0)
             {
                 livro.FotoCapa = await SalvarArquivoCapa(arquivoCapa);
@@ -89,7 +87,6 @@ public class LivrosController : Controller
                 livro.FotoCapa = urlCapa.Trim();
             }
 
-            // Atualização inteligente de status com base nas páginas
             AjustarStatusPorPaginas(livro);
 
             _context.Add(livro);
@@ -106,7 +103,8 @@ public class LivrosController : Controller
         if (id == null) return NotFound();
 
         var usuarioId = ObterUsuarioIdLogado();
-        var livro = await _context.Livros.FirstOrDefaultAsync(l => l.Id == id && l.UsuarioId == usuarioId);
+        var livro = await _context.Livros
+            .FirstOrDefaultAsync(l => l.Id == id && l.UsuarioId == usuarioId);
 
         if (livro == null) return NotFound();
 
@@ -130,7 +128,6 @@ public class LivrosController : Controller
         {
             livro.UsuarioId = usuarioId;
 
-            // Tratamento da imagem
             if (removerCapa)
             {
                 RemoverArquivoFisico(livroOriginal.FotoCapa);
@@ -147,7 +144,6 @@ public class LivrosController : Controller
             }
             else
             {
-                // Mantém a foto anterior
                 livro.FotoCapa = livroOriginal.FotoCapa;
             }
 
@@ -167,7 +163,8 @@ public class LivrosController : Controller
     public async Task<IActionResult> ConfirmarExclusao(int id)
     {
         var usuarioId = ObterUsuarioIdLogado();
-        var livro = await _context.Livros.FirstOrDefaultAsync(l => l.Id == id && l.UsuarioId == usuarioId);
+        var livro = await _context.Livros
+            .FirstOrDefaultAsync(l => l.Id == id && l.UsuarioId == usuarioId);
 
         if (livro != null)
         {
@@ -182,7 +179,6 @@ public class LivrosController : Controller
     // Métodos Auxiliares
     private async Task<string> SalvarArquivoCapa(IFormFile arquivo)
     {
-        // Garante um caminho seguro mesmo se WebRootPath for nulo
         var webRoot = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
         var pastaCapas = Path.Combine(webRoot, "capas");
 
@@ -192,6 +188,12 @@ public class LivrosController : Controller
         }
 
         var extensao = Path.GetExtension(arquivo.FileName).ToLowerInvariant();
+        var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg", ".webp" };
+        if (!extensoesPermitidas.Contains(extensao))
+        {
+            throw new InvalidOperationException("Formato de imagem não suportado. Envie PNG, JPG ou WEBP.");
+        }
+
         var nomeArquivo = $"{Guid.NewGuid()}{extensao}";
         var caminhoCompleto = Path.Combine(pastaCapas, nomeArquivo);
 
@@ -202,11 +204,13 @@ public class LivrosController : Controller
 
         return $"/capas/{nomeArquivo}";
     }
+
     private void RemoverArquivoFisico(string? caminhoRelativo)
     {
         if (string.IsNullOrEmpty(caminhoRelativo) || !caminhoRelativo.StartsWith("/capas/")) return;
 
-        var caminhoFisico = Path.Combine(_env.WebRootPath, caminhoRelativo.TrimStart('/'));
+        var webRoot = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        var caminhoFisico = Path.Combine(webRoot, caminhoRelativo.TrimStart('/'));
         if (System.IO.File.Exists(caminhoFisico))
         {
             try
@@ -215,7 +219,7 @@ public class LivrosController : Controller
             }
             catch
             {
-                // Evita que falha de arquivo bloqueie a operação do banco
+                // Silencia falha de exclusão de arquivo órfão
             }
         }
     }

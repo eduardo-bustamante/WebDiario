@@ -7,7 +7,7 @@ using WebDiario.Models;
 
 namespace WebDiario.Controllers;
 
-[Authorize] // Bloqueia qualquer acesso anônimo ao diário
+[Authorize]
 public class DiarioController : Controller
 {
     private readonly AppDbContext _context;
@@ -17,144 +17,131 @@ public class DiarioController : Controller
         _context = context;
     }
 
-    // Helper privado para pegar o Id do usuário autenticado
-    private string ObterUsuarioId() => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-    // GET: Diario
-    public async Task<IActionResult> Index(string? termoBusca, string? filtroHumor)
+    private string ObterUsuarioIdLogado()
     {
-        var usuarioId = ObterUsuarioId();
+        return User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? throw new InvalidOperationException("Usuário não autenticado.");
+    }
 
-        // IMPORTANTE: Só busca as anotações pertencentes ao usuário conectado
-        var query = _context.EntradasDiario
-            .Where(e => e.UsuarioId == usuarioId);
+    // GET: /Diario
+    public async Task<IActionResult> Index(string? busca, int? humor)
+    {
+        var usuarioId = ObterUsuarioIdLogado();
+        var query = _context.Diarios.Where(d => d.UsuarioId == usuarioId);
 
-        if (!string.IsNullOrWhiteSpace(termoBusca))
+        if (!string.IsNullOrWhiteSpace(busca))
         {
-            var termo = termoBusca.Trim();
-            query = query.Where(e => e.Titulo.Contains(termo) || e.Conteudo.Contains(termo));
+            var termo = busca.Trim();
+            query = query.Where(d => d.Titulo.Contains(termo) || d.Conteudo.Contains(termo));
         }
 
-        if (!string.IsNullOrWhiteSpace(filtroHumor))
+        if (humor.HasValue && humor.Value >= 1 && humor.Value <= 5)
         {
-            query = query.Where(e => e.Humor == filtroHumor);
+            query = query.Where(d => d.NivelHumor == humor.Value);
         }
 
-        var entradas = await query.OrderByDescending(e => e.DataCriacao).ToListAsync();
+        ViewData["BuscaAtual"] = busca;
+        ViewData["HumorAtual"] = humor;
 
-        ViewData["TermoBuscaAtual"] = termoBusca;
-        ViewData["HumorAtual"] = filtroHumor;
-
+        var entradas = await query.OrderByDescending(d => d.DataRegistro)
+                                  .ThenByDescending(d => d.DataCriacao)
+                                  .ToListAsync();
         return View(entradas);
     }
 
-    // GET: Diario/Criar
-    public IActionResult Criar() => View(new EntradaDiario());
-
-    // POST: Diario/Criar
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Criar(EntradaDiario entrada)
-    {
-        // Vincula a entrada ao usuário logado antes de salvar
-        entrada.UsuarioId = ObterUsuarioId();
-        ModelState.Remove(nameof(entrada.UsuarioId));
-
-        if (ModelState.IsValid)
-        {
-            _context.Add(entrada);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        return View(entrada);
-    }
-
-    // GET: Diario/Detalhes/5
+    // GET: /Diario/Detalhes/5
     public async Task<IActionResult> Detalhes(int? id)
     {
         if (id == null) return NotFound();
 
-        var usuarioId = ObterUsuarioId();
-        var entrada = await _context.EntradasDiario
-            .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
+        var usuarioId = ObterUsuarioIdLogado();
+        var entrada = await _context.Diarios
+            .FirstOrDefaultAsync(d => d.Id == id && d.UsuarioId == usuarioId);
 
         if (entrada == null) return NotFound();
 
         return View(entrada);
     }
 
-    // GET: Diario/Editar/5
+    // GET: /Diario/Criar
+    public IActionResult Criar()
+    {
+        return View(new Diario());
+    }
+
+    // POST: /Diario/Criar
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Criar(Diario diario)
+    {
+        if (ModelState.IsValid)
+        {
+            diario.UsuarioId = ObterUsuarioIdLogado();
+            diario.DataCriacao = DateTime.Now;
+
+            _context.Add(diario);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(diario);
+    }
+
+    // GET: /Diario/Editar/5
     public async Task<IActionResult> Editar(int? id)
     {
         if (id == null) return NotFound();
 
-        var usuarioId = ObterUsuarioId();
-        var entrada = await _context.EntradasDiario
-            .FirstOrDefaultAsync(e => e.Id == id && e.UsuarioId == usuarioId);
+        var usuarioId = ObterUsuarioIdLogado();
+        var entrada = await _context.Diarios
+            .FirstOrDefaultAsync(d => d.Id == id && d.UsuarioId == usuarioId);
 
         if (entrada == null) return NotFound();
 
         return View(entrada);
     }
 
-    // POST: Diario/Editar/5
+    // POST: /Diario/Editar/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Editar(int id, EntradaDiario entrada)
+    public async Task<IActionResult> Editar(int id, Diario diario)
     {
-        if (id != entrada.Id) return NotFound();
+        if (id != diario.Id) return NotFound();
 
-        var usuarioId = ObterUsuarioId();
+        var usuarioId = ObterUsuarioIdLogado();
+        var entradaOriginal = await _context.Diarios.AsNoTracking()
+            .FirstOrDefaultAsync(d => d.Id == id && d.UsuarioId == usuarioId);
 
-        // Impede que um usuário altere a titularidade do registro
-        var registroExistente = await _context.EntradasDiario
-            .AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == id && e.UsuarioId == usuarioId);
-
-        if (registroExistente == null) return Unauthorized();
-
-        entrada.UsuarioId = usuarioId;
-        ModelState.Remove(nameof(entrada.UsuarioId));
+        if (entradaOriginal == null) return Unauthorized();
 
         if (ModelState.IsValid)
         {
-            _context.Update(entrada);
+            diario.UsuarioId = usuarioId;
+            diario.DataCriacao = entradaOriginal.DataCriacao;
+
+            _context.Update(diario);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        return View(entrada);
+
+        return View(diario);
     }
 
-    // GET: Diario/Excluir/5
-    public async Task<IActionResult> Excluir(int? id)
-    {
-        if (id == null) return NotFound();
-
-        var usuarioId = ObterUsuarioId();
-        var entrada = await _context.EntradasDiario
-            .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
-
-        if (entrada == null) return NotFound();
-
-        return View(entrada);
-    }
-
-    // POST: Diario/Excluir/5
+    // POST: /Diario/Excluir/5
     [HttpPost, ActionName("Excluir")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ConfirmarExclusao(int id)
     {
-        var usuarioId = ObterUsuarioId();
-        var entrada = await _context.EntradasDiario
-            .FirstOrDefaultAsync(e => e.Id == id && e.UsuarioId == usuarioId);
+        var usuarioId = ObterUsuarioIdLogado();
+        var entrada = await _context.Diarios
+            .FirstOrDefaultAsync(d => d.Id == id && d.UsuarioId == usuarioId);
 
         if (entrada != null)
         {
-            _context.EntradasDiario.Remove(entrada);
+            _context.Diarios.Remove(entrada);
             await _context.SaveChangesAsync();
         }
+
         return RedirectToAction(nameof(Index));
     }
 }

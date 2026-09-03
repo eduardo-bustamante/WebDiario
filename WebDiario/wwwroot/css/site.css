@@ -1,38 +1,113 @@
+/* ========================================================== */
+/* 1. PALETA RELAXANTE - PÁGINA ABERTA (SÁLVIA & PETRÓLEO)    */
+/* ========================================================== */
+:root {
+    --sage-primary: #2d6a4f; /* Verde floresta suave */
+    --sage-hover: #1b4332; /* Verde floresta escuro */
+    --sage-subtle: #d8f3dc; /* Verde sálvia claro */
+    --teal-dark: #1b3b36; /* Petróleo escuro para títulos */
+    --bg-relax: #f6f8f7; /* Fundo sereno (off-white gelo) */
+    --nav-glass: rgba(255, 255, 255, 0.92);
+}
+
+/* ========================================================== */
+/* 2. BASE, TIPOGRAFIA & FOCO                                 */
+/* ========================================================== */
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-    margin-bottom: 60px;
-    background-color: #fafafa;
-    color: #333333;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-relax);
+    color: #2b2d42;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Foco nos inputs alinhado ao verde sálvia */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: var(--sage-primary);
+    box-shadow: 0 0 0 0.2rem rgba(45, 106, 79, 0.18) !important;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* ========================================================== */
+/* 3. MENU SUPERIOR (GLASSMORPHISM & ABAS)                    */
+/* ========================================================== */
+.navbar-relax {
+    background-color: var(--nav-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(45, 106, 79, 0.12) !important;
+    transition: all 0.3s ease;
 }
-/* Efeito de elevação suave nos cards do diário */
+
+.brand-title {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--teal-dark) !important;
+}
+
+.brand-badge {
+    background-color: var(--sage-subtle);
+    color: var(--sage-primary);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* Links em formato pílula suave */
+.nav-link-relax {
+    color: #495057 !important;
+    font-weight: 500;
+    font-size: 0.94rem;
+    padding: 0.5rem 1.1rem !important;
+    border-radius: 50rem;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+}
+
+    .nav-link-relax:hover {
+        color: var(--sage-primary) !important;
+        background-color: var(--sage-subtle);
+        transform: translateY(-1px);
+    }
+
+    .nav-link-relax.active {
+        background-color: #e8f5e9 !important;
+        color: var(--sage-primary) !important;
+        font-weight: 600;
+    }
+
+/* Botão principal de ação */
+.btn-relax-primary {
+    background-color: var(--sage-primary);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 50rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+    .btn-relax-primary:hover {
+        background-color: var(--sage-hover);
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+        transform: translateY(-1px);
+    }
+
+/* ========================================================== */
+/* 4. CARDS & ESTANTE DE LIVROS                               */
+/* ========================================================== */
 .diary-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -42,7 +117,14 @@ body {
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
     }
 
-/* Limita a exibição do texto a no máximo 3 linhas nos cards */
+.hover-scale {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+
 .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -50,8 +132,60 @@ body {
     overflow: hidden;
 }
 
-/* Suavização de inputs com foco */
-.form-control:focus, .form-select:focus {
-    border-color: #495057;
-    box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.1);
+.extra-small {
+    font-size: 0.75rem;
+}
+
+/* ========================================================== */
+/* 5. ESCALA INTERATIVA DE HUMOR (DIÁRIO)                     */
+/* ========================================================== */
+.mood-item {
+    cursor: pointer;
+    min-width: 95px;
+    background-color: #ffffff;
+    border-width: 1.5px;
+    transition: all 0.2s ease-in-out;
+}
+
+    .mood-item:hover {
+        transform: translateY(-2px);
+    }
+
+.btn-check:checked + .btn-outline-danger {
+    background-color: #dc3545;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+}
+
+.btn-check:checked + .btn-outline-warning {
+    background-color: #ffc107;
+    color: #000;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);
+}
+
+.btn-check:checked + .btn-outline-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.25);
+}
+
+.btn-check:checked + .btn-outline-info {
+    background-color: #0dcaf0;
+    color: #000;
+    box-shadow: 0 4px 12px rgba(13, 202, 240, 0.25);
+}
+
+.btn-check:checked + .btn-outline-success {
+    background-color: #198754;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.25);
+}
+
+/* ========================================================== */
+/* 6. CORREÇÃO DO RODAPÉ (EVITA CORTAR TELAS GRANDES/EDITAR)  */
+/* ========================================================== */
+.footer {
+    position: static !important;
+    bottom: auto !important;
+    width: 100%;
 }

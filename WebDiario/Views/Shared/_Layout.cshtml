@@ -1,57 +1,93 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var controllerAtual = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - WebDiario</title>
+    <title>@ViewData["Title"] - Página Aberta</title>
+
+    <!-- CSS Base do Bootstrap e do Projeto -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebDiario.styles.css" asp-append-version="true" />
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100">
 
-    <header>
-        <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom shadow-sm mb-4 py-3">
+    <!-- Menu Superior Fixo com Efeito Vidro -->
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-md navbar-relax py-2 shadow-sm">
             <div class="container">
-                <!-- Marca / Logo -->
-                <a class="navbar-brand fw-bold text-secondary d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
-                    <span class="fs-4">📓</span>
-                    <span class="text-dark">Web Diario </span>
+                <!-- Marca / Logotipo -->
+                <a class="navbar-brand d-flex align-items-center gap-2 brand-title me-3" asp-controller="Home" asp-action="Index">
+                    <span class="fs-4">🌿</span>
+                    <span>Página Aberta</span>
+                    <span class="badge brand-badge rounded-pill px-2 py-1 ms-1 d-none d-sm-inline">Leituras & Dias</span>
                 </a>
 
                 <!-- Botão Hamburger Mobile -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
+                <button class="navbar-toggler border-0 shadow-none p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
                         aria-controls="navbarMain" aria-expanded="false" aria-label="Menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Itens Colapsáveis -->
+                <!-- Itens de Navegação e Ações -->
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav me-auto mb-2 mb-md-0 ms-md-3">
-                        <li class="nav-item">
-                            <a class="nav-link text-muted" asp-controller="Home" asp-action="Index">Início</a>
-                        </li>
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0 gap-1 ms-md-2">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-muted" asp-controller="Diario" asp-action="Index">Meus Registros</a>
+                                <a class="nav-link-relax @(controllerAtual == "Diario" ? "active" : "")"
+                                   asp-controller="Diario" asp-action="Index">
+                                    <span>📖</span> Diário
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link-relax @(controllerAtual == "Livros" ? "active" : "")"
+                                   asp-controller="Livros" asp-action="Index">
+                                    <span>📚</span> Livros
+                                </a>
                             </li>
                         }
                     </ul>
 
-                    <!-- Seção de Ações e Usuário -->
+                    <!-- Seção do Usuário Autenticado / Visitante -->
                     <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 mt-3 mt-md-0">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <a asp-controller="Diario" asp-action="Criar" class="btn btn-outline-secondary btn-sm px-3 rounded-pill">
-                                + Escrever Agora
-                            </a>
-                            <span class="text-muted small ms-md-2">
-                                Olá, <strong>@(User.Identity.Name?.Split('@')[0] ?? "Usuário")</strong>
-                            </span>
-                            <form asp-controller="Conta" asp-action="Sair" method="post" class="d-inline">
+                            @if (controllerAtual == "Diario")
+                            {
+                                <a asp-action="Criar" class="btn btn-relax-primary px-3 shadow-sm">
+                                    Criar Registro
+                                </a>
+                            }
+                            else if (controllerAtual == "Livros")
+                            {
+                                <a asp-action="Criar" class="btn btn-relax-primary px-3 shadow-sm">
+                                    Adicionar Livro
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Diario" asp-action="Index" class="btn btn-relax-primary px-3 shadow-sm">
+                                    Ir para o Diário
+                                </a>
+                            }
+
+
+                            <!-- Chip com Nome de Usuário -->
+                            <div class="d-flex align-items-center gap-2 bg-white px-3 py-1 rounded-pill border shadow-sm ms-md-2">
+                                <span class="badge bg-success-subtle text-success rounded-circle p-1">●</span>
+                                <span class="small fw-semibold text-secondary">
+                                    @(User.Identity.Name ?? "Usuário")
+                                </span>
+                            </div>
+
+                            <!-- Botão de Sair -->
+                            <form asp-controller="Conta" asp-action="Sair" method="post" class="d-inline mb-0">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-light border rounded-pill px-3">
+                                <button type="submit" class="btn btn-sm btn-light border rounded-pill px-3 text-secondary" title="Encerrar sessão">
                                     Sair
                                 </button>
                             </form>
@@ -61,7 +97,7 @@
                             <a asp-controller="Conta" asp-action="Login" class="btn btn-link text-decoration-none text-muted btn-sm">
                                 Entrar
                             </a>
-                            <a asp-controller="Conta" asp-action="Registrar" class="btn btn-dark btn-sm rounded-pill px-3">
+                            <a asp-controller="Conta" asp-action="Registrar" class="btn btn-sm btn-relax-primary px-3 shadow-sm">
                                 Criar Conta
                             </a>
                         }
@@ -71,18 +107,21 @@
         </nav>
     </header>
 
-    <div class="container flex-grow-1">
+    <!-- Corpo das Telas -->
+    <div class="container flex-grow-1 py-3">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted py-3 bg-white mt-auto">
-        <div class="container text-center small">
-            &copy; 2026 - WebDiario - Seu diário pessoal seguro
+    <!-- Rodapé -->
+    <footer class="footer mt-auto py-3 bg-white border-top text-center text-muted small">
+        <div class="container">
+            <span class="opacity-75">🍃 Página Aberta • Seu espaço pessoal para acolher ideias e histórias</span>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

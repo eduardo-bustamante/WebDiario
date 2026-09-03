@@ -1,6 +1,4 @@
 <Solution>
-  <Folder Name="/Itens de Solução/">
-    <File Path="Dockerfile.txt" />
-  </Folder>
+  <Folder Name="/Itens de Solução/" />
   <Project Path="WebDiario/WebDiario.csproj" />
 </Solution>
