@@ -74,10 +74,13 @@ public class LivrosController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Criar(Livro livro, IFormFile? arquivoCapa, string? urlCapa)
     {
+        livro.UsuarioId = ObterUsuarioIdLogado();
+
+        // Remove a validação do UsuarioId para evitar falso-positivo de ModelState inválido
+        ModelState.Remove(nameof(Livro.UsuarioId));
+
         if (ModelState.IsValid)
         {
-            livro.UsuarioId = ObterUsuarioIdLogado();
-
             if (arquivoCapa != null && arquivoCapa.Length > 0)
             {
                 livro.FotoCapa = await SalvarArquivoCapa(arquivoCapa);
@@ -124,10 +127,11 @@ public class LivrosController : Controller
 
         if (livroOriginal == null) return Unauthorized();
 
+        livro.UsuarioId = usuarioId;
+        ModelState.Remove(nameof(Livro.UsuarioId));
+
         if (ModelState.IsValid)
         {
-            livro.UsuarioId = usuarioId;
-
             if (removerCapa)
             {
                 RemoverArquivoFisico(livroOriginal.FotoCapa);
@@ -144,6 +148,7 @@ public class LivrosController : Controller
             }
             else
             {
+                // Mantém a imagem anterior caso não tenha enviado nova
                 livro.FotoCapa = livroOriginal.FotoCapa;
             }
 
@@ -176,10 +181,17 @@ public class LivrosController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // Métodos Auxiliares
+    // ==========================================
+    // MÉTODOS AUXILIARES DE IMAGEM E STATUS
+    // ==========================================
+
     private async Task<string> SalvarArquivoCapa(IFormFile arquivo)
     {
-        var webRoot = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        // Garante o caminho físico correto mesmo publicado via .exe
+        var webRoot = !string.IsNullOrEmpty(_env.WebRootPath)
+            ? _env.WebRootPath
+            : Path.Combine(AppContext.BaseDirectory, "wwwroot");
+
         var pastaCapas = Path.Combine(webRoot, "capas");
 
         if (!Directory.Exists(pastaCapas))
@@ -189,19 +201,21 @@ public class LivrosController : Controller
 
         var extensao = Path.GetExtension(arquivo.FileName).ToLowerInvariant();
         var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg", ".webp" };
+
         if (!extensoesPermitidas.Contains(extensao))
         {
-            throw new InvalidOperationException("Formato de imagem não suportado. Envie PNG, JPG ou WEBP.");
+            throw new InvalidOperationException("Formato de imagem inválido. Use PNG, JPG ou WEBP.");
         }
 
         var nomeArquivo = $"{Guid.NewGuid()}{extensao}";
-        var caminhoCompleto = Path.Combine(pastaCapas, nomeArquivo);
+        var caminhoFisico = Path.Combine(pastaCapas, nomeArquivo);
 
-        using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+        using (var stream = new FileStream(caminhoFisico, FileMode.Create))
         {
             await arquivo.CopyToAsync(stream);
         }
 
+        // Retorna a URL relativa web padrão para renderizar na tag <img>
         return $"/capas/{nomeArquivo}";
     }
 
@@ -209,8 +223,13 @@ public class LivrosController : Controller
     {
         if (string.IsNullOrEmpty(caminhoRelativo) || !caminhoRelativo.StartsWith("/capas/")) return;
 
-        var webRoot = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
-        var caminhoFisico = Path.Combine(webRoot, caminhoRelativo.TrimStart('/'));
+        var webRoot = !string.IsNullOrEmpty(_env.WebRootPath)
+            ? _env.WebRootPath
+            : Path.Combine(AppContext.BaseDirectory, "wwwroot");
+
+        var nomeArquivo = Path.GetFileName(caminhoRelativo);
+        var caminhoFisico = Path.Combine(webRoot, "capas", nomeArquivo);
+
         if (System.IO.File.Exists(caminhoFisico))
         {
             try
@@ -219,7 +238,7 @@ public class LivrosController : Controller
             }
             catch
             {
-                // Silencia falha de exclusão de arquivo órfão
+                // Silencia caso o arquivo esteja temporariamente bloqueado por outro processo
             }
         }
     }

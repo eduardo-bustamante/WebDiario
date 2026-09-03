@@ -7,15 +7,15 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-
+            
             <a asp-action="Index" class="btn btn-link text-muted text-decoration-none mb-3 ps-0">
                 ← Voltar para a estante
             </a>
 
             <div class="card border rounded-4 shadow-sm bg-white p-4 p-md-5">
                 <div class="mb-4">
-                    <h2 class="fw-bold text-dark mb-1">Novo Livro</h2>
-                    <p class="text-muted small mb-0">Adicione uma nova obra à sua biblioteca pessoal.</p>
+                    <h2 class="fw-bold text-dark mb-1">Cadastrar Livro</h2>
+                    <p class="text-muted small mb-0">Adicione uma nova leitura ao seu acervo pessoal.</p>
                 </div>
 
                 <form asp-action="Criar" method="post" enctype="multipart/form-data">
@@ -26,24 +26,24 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label asp-for="Titulo" class="form-label fw-semibold small text-uppercase text-secondary">Título *</label>
-                            <input asp-for="Titulo" class="form-control rounded-3 border-light-subtle" placeholder="Ex: Dom Quixote" />
+                            <input asp-for="Titulo" class="form-control rounded-3 border-light-subtle" placeholder="Ex: O Hobbit" required />
                             <span asp-validation-for="Titulo" class="text-danger small"></span>
                         </div>
                         <div class="col-md-5">
                             <label asp-for="Autor" class="form-label fw-semibold small text-uppercase text-secondary">Autor</label>
-                            <input asp-for="Autor" class="form-control rounded-3 border-light-subtle" placeholder="Ex: Miguel de Cervantes" />
+                            <input asp-for="Autor" class="form-control rounded-3 border-light-subtle" placeholder="Ex: J.R.R. Tolkien" />
                             <span asp-validation-for="Autor" class="text-danger small"></span>
                         </div>
                     </div>
 
-                    <!-- Gênero, Status e Avaliação -->
+                    <!-- Categoria, Status e Avaliação -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label asp-for="Categoria" class="form-label fw-semibold small text-uppercase text-secondary">Gênero / Categoria</label>
-                            <input asp-for="Categoria" class="form-control rounded-3 border-light-subtle" placeholder="Ex: Ficção, Filosofia..." />
+                            <input asp-for="Categoria" class="form-control rounded-3 border-light-subtle" placeholder="Ex: Fantasia, Ficção..." />
                         </div>
                         <div class="col-md-4">
-                            <label asp-for="Status" class="form-label fw-semibold small text-uppercase text-secondary">Status de Leitura</label>
+                            <label asp-for="Status" class="form-label fw-semibold small text-uppercase text-secondary">Status</label>
                             <select asp-for="Status" class="form-select rounded-3 border-light-subtle">
                                 <option value="Quero Ler">Quero Ler</option>
                                 <option value="Lendo">Lendo</option>
@@ -52,7 +52,7 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label asp-for="Avaliacao" class="form-label fw-semibold small text-uppercase text-secondary">Avaliação (1 a 5)</label>
+                            <label asp-for="Avaliacao" class="form-label fw-semibold small text-uppercase text-secondary">Avaliação</label>
                             <select asp-for="Avaliacao" class="form-select rounded-3 border-light-subtle">
                                 <option value="">Sem avaliação</option>
                                 <option value="5">★★★★★ (5)</option>
@@ -68,41 +68,62 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label asp-for="PaginasLidas" class="form-label fw-semibold small text-uppercase text-secondary">Páginas Lidas</label>
-                            <input asp-for="PaginasLidas" type="number" min="0" class="form-control rounded-3 border-light-subtle" />
+                            <input asp-for="PaginasLidas" type="number" min="0" class="form-control rounded-3 border-light-subtle" value="0" />
                             <span asp-validation-for="PaginasLidas" class="text-danger small"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="TotalPaginas" class="form-label fw-semibold small text-uppercase text-secondary">Total de Páginas</label>
-                            <input asp-for="TotalPaginas" type="number" min="0" class="form-control rounded-3 border-light-subtle" />
+                            <input asp-for="TotalPaginas" type="number" min="0" class="form-control rounded-3 border-light-subtle" value="0" />
                             <span asp-validation-for="TotalPaginas" class="text-danger small"></span>
                         </div>
                     </div>
 
-                    <!-- Upload ou Link de Capa -->
+                    <!-- Bloco de Imagem com Pré-visualização -->
                     <div class="card bg-light border-0 rounded-3 p-3 mb-4">
-                        <label class="form-label fw-semibold small text-uppercase text-secondary mb-2">Capa do Livro (Opcional)</label>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="small text-muted mb-1">Enviar Arquivo (PNG, JPG, WEBP):</label>
-                                <input type="file" name="arquivoCapa" class="form-control form-control-sm rounded-3 bg-white" accept="image/png, image/jpeg, image/webp, image/*" />
+                        <label class="form-label fw-semibold small text-uppercase text-secondary mb-2">Capa do Livro</label>
+                        
+                        <div class="row align-items-center g-3">
+                            <!-- Preview da Imagem -->
+                            <div class="col-auto text-center">
+                                <div id="containerPreview" class="rounded-3 border bg-white d-flex align-items-center justify-content-center overflow-hidden" 
+                                     style="width: 75px; height: 105px;">
+                                    <span id="iconeSemPreview" class="text-muted" style="font-size: 1.8rem;">📖</span>
+                                    <img id="imgPreview" src="#" alt="Prévia da Capa" class="d-none w-100 h-100" style="object-fit: cover;" />
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="small text-muted mb-1">Ou cole a URL da Capa:</label>
-                                <input type="url" name="urlCapa" class="form-control form-control-sm rounded-3 bg-white" placeholder="https://exemplo.com/imagem.png" />
+
+                            <!-- Controles de Upload / URL -->
+                            <div class="col">
+                                <div class="mb-2">
+                                    <label class="extra-small text-muted mb-1 d-block">Selecionar arquivo (PNG, JPG, WEBP):</label>
+                                    <input type="file" 
+                                           name="arquivoCapa" 
+                                           id="campoArquivo" 
+                                           class="form-control form-control-sm rounded-3 bg-white" 
+                                           accept="image/png, image/jpeg, image/webp, image/*" />
+                                </div>
+                                <div>
+                                    <label class="extra-small text-muted mb-1 d-block">Ou inserir link de imagem externa:</label>
+                                    <input type="url" 
+                                           name="urlCapa" 
+                                           id="campoUrl" 
+                                           class="form-control form-control-sm rounded-3 bg-white" 
+                                           placeholder="https://exemplo.com/capa.png" />
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Notas / Resenha -->
                     <div class="mb-4">
-                        <label asp-for="Notas" class="form-label fw-semibold small text-uppercase text-secondary">Notas e Resenha Pessoal</label>
-                        <textarea asp-for="Notas" rows="4" class="form-control rounded-3 border-light-subtle" placeholder="Suas impressões, citações favoritas..."></textarea>
+                        <label asp-for="Notas" class="form-label fw-semibold small text-uppercase text-secondary">Anotações / Resenha</label>
+                        <textarea asp-for="Notas" rows="4" class="form-control rounded-3 border-light-subtle" placeholder="Reflexões sobre a obra, citações ou ideias..."></textarea>
                     </div>
 
                     <!-- Botões de Ação -->
                     <div class="d-flex justify-content-end align-items-center gap-3 pt-3 border-top">
                         <a asp-action="Index" class="btn btn-light rounded-pill px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-relax-primary px-5 shadow-sm">Cadastrar Livro</button>
+                        <button type="submit" class="btn btn-relax-primary px-5 shadow-sm">Salvar Livro</button>
                     </div>
 
                 </form>
@@ -114,4 +135,47 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const campoArquivo = document.getElementById('campoArquivo');
+        const campoUrl = document.getElementById('campoUrl');
+        const imgPreview = document.getElementById('imgPreview');
+        const iconeSemPreview = document.getElementById('iconeSemPreview');
+
+        function atualizarPreview(origemUrl) {
+            if (origemUrl) {
+                imgPreview.src = origemUrl;
+                imgPreview.classList.remove('d-none');
+                iconeSemPreview.classList.add('d-none');
+            } else {
+                imgPreview.src = '#';
+                imgPreview.classList.add('d-none');
+                iconeSemPreview.classList.remove('d-none');
+            }
+        }
+
+        campoArquivo.addEventListener('change', function () {
+            const arquivo = this.files[0];
+            if (arquivo) {
+                campoUrl.value = '';
+                const leitor = new FileReader();
+                leitor.onload = function (e) {
+                    atualizarPreview(e.target.result);
+                };
+                leitor.readAsDataURL(arquivo);
+            } else {
+                atualizarPreview(null);
+            }
+        });
+
+        campoUrl.addEventListener('input', function () {
+            const url = this.value.trim();
+            if (url) {
+                campoArquivo.value = '';
+                atualizarPreview(url);
+            } else {
+                atualizarPreview(null);
+            }
+        });
+    </script>
 }

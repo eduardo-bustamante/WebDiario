@@ -2,12 +2,13 @@
 
 @{
     ViewData["Title"] = "Editar Livro";
+    var temCapaCadastrada = !string.IsNullOrEmpty(Model.FotoCapa);
 }
 
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-
+            
             <a asp-action="Index" class="btn btn-link text-muted text-decoration-none mb-3 ps-0">
                 ← Voltar para a estante
             </a>
@@ -16,7 +17,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h2 class="fw-bold text-dark mb-1">Editar Livro</h2>
-                        <p class="text-muted small mb-0">Atualize o progresso da sua leitura ou informações do livro.</p>
+                        <p class="text-muted small mb-0">Atualize o progresso da leitura, capa ou detalhes da obra.</p>
                     </div>
                     <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill">Edição</span>
                 </div>
@@ -25,6 +26,7 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="DataCadastro" />
+                    <input type="hidden" asp-for="UsuarioId" />
 
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -32,7 +34,7 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label asp-for="Titulo" class="form-label fw-semibold small text-uppercase text-secondary">Título *</label>
-                            <input asp-for="Titulo" class="form-control rounded-3 border-light-subtle" />
+                            <input asp-for="Titulo" class="form-control rounded-3 border-light-subtle" required />
                             <span asp-validation-for="Titulo" class="text-danger small"></span>
                         </div>
                         <div class="col-md-5">
@@ -42,14 +44,14 @@
                         </div>
                     </div>
 
-                    <!-- Gênero, Status e Avaliação -->
+                    <!-- Categoria, Status e Avaliação -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label asp-for="Categoria" class="form-label fw-semibold small text-uppercase text-secondary">Gênero / Categoria</label>
                             <input asp-for="Categoria" class="form-control rounded-3 border-light-subtle" />
                         </div>
                         <div class="col-md-4">
-                            <label asp-for="Status" class="form-label fw-semibold small text-uppercase text-secondary">Status de Leitura</label>
+                            <label asp-for="Status" class="form-label fw-semibold small text-uppercase text-secondary">Status</label>
                             <select asp-for="Status" class="form-select rounded-3 border-light-subtle">
                                 <option value="Quero Ler">Quero Ler</option>
                                 <option value="Lendo">Lendo</option>
@@ -58,7 +60,7 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label asp-for="Avaliacao" class="form-label fw-semibold small text-uppercase text-secondary">Avaliação (1 a 5)</label>
+                            <label asp-for="Avaliacao" class="form-label fw-semibold small text-uppercase text-secondary">Avaliação</label>
                             <select asp-for="Avaliacao" class="form-select rounded-3 border-light-subtle">
                                 <option value="">Sem avaliação</option>
                                 <option value="5">★★★★★ (5)</option>
@@ -84,41 +86,60 @@
                         </div>
                     </div>
 
-                    <!-- Gerenciar Capa -->
+                    <!-- Gestão e Preview de Capa -->
                     <div class="card bg-light border-0 rounded-3 p-3 mb-4">
                         <label class="form-label fw-semibold small text-uppercase text-secondary mb-2">Capa do Livro</label>
+                        
+                        <div class="row align-items-center g-3">
+                            <!-- Preview Atual ou Novo -->
+                            <div class="col-auto text-center">
+                                <div id="containerPreview" class="rounded-3 border bg-white d-flex align-items-center justify-content-center overflow-hidden" 
+                                     style="width: 75px; height: 105px;">
+                                    <span id="iconeSemPreview" class="text-muted @(temCapaCadastrada ? "d-none" : "")" style="font-size: 1.8rem;">📖</span>
+                                    <img id="imgPreview" 
+                                         src="@(temCapaCadastrada ? Model.FotoCapa : "#")" 
+                                         alt="Capa" 
+                                         class="@(temCapaCadastrada ? "" : "d-none") w-100 h-100" 
+                                         style="object-fit: cover;" />
+                                </div>
+                            </div>
 
-                        @if (!string.IsNullOrEmpty(Model.FotoCapa))
-                        {
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <img src="@Model.FotoCapa" alt="Capa Atual" class="rounded border bg-white" style="width: 50px; height: 75px; object-fit: cover;" />
-                                <div>
-                                    <div class="small fw-semibold">Capa atual cadastrada</div>
-                                    <div class="form-check mt-1">
+                            <!-- Controles de Substituição / Remoção -->
+                            <div class="col">
+                                @if (temCapaCadastrada)
+                                {
+                                    <div class="form-check mb-2">
                                         <input class="form-check-input" type="checkbox" id="removerCapa" name="removerCapa" value="true">
-                                        <label class="form-check-label extra-small text-danger" for="removerCapa">
+                                        <label class="form-check-label extra-small text-danger fw-semibold" for="removerCapa">
                                             Remover capa atual
                                         </label>
                                     </div>
-                                </div>
-                            </div>
-                        }
+                                }
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="small text-muted mb-1">Substituir por arquivo:</label>
-                                <input type="file" name="arquivoCapa" class="form-control form-control-sm rounded-3 bg-white" accept="image/png, image/jpeg, image/webp, image/*" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="small text-muted mb-1">Ou nova URL:</label>
-                                <input type="url" name="urlCapa" value="@Model.FotoCapa" class="form-control form-control-sm rounded-3 bg-white" placeholder="https://exemplo.com/imagem.png" />
+                                <div class="mb-2">
+                                    <label class="extra-small text-muted mb-1 d-block">Substituir por arquivo local (PNG, JPG, WEBP):</label>
+                                    <input type="file" 
+                                           name="arquivoCapa" 
+                                           id="campoArquivo" 
+                                           class="form-control form-control-sm rounded-3 bg-white" 
+                                           accept="image/png, image/jpeg, image/webp, image/*" />
+                                </div>
+                                <div>
+                                    <label class="extra-small text-muted mb-1 d-block">Ou atualizar com link externo:</label>
+                                    <input type="url" 
+                                           name="urlCapa" 
+                                           id="campoUrl" 
+                                           value="@(!string.IsNullOrEmpty(Model.FotoCapa) && Model.FotoCapa.StartsWith("http") ? Model.FotoCapa : "")"
+                                           class="form-control form-control-sm rounded-3 bg-white" 
+                                           placeholder="https://exemplo.com/capa.png" />
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Notas / Resenha -->
                     <div class="mb-4">
-                        <label asp-for="Notas" class="form-label fw-semibold small text-uppercase text-secondary">Notas e Resenha</label>
+                        <label asp-for="Notas" class="form-label fw-semibold small text-uppercase text-secondary">Anotações / Resenha</label>
                         <textarea asp-for="Notas" rows="4" class="form-control rounded-3 border-light-subtle"></textarea>
                     </div>
 
@@ -137,4 +158,61 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const campoArquivo = document.getElementById('campoArquivo');
+        const campoUrl = document.getElementById('campoUrl');
+        const checkRemover = document.getElementById('removerCapa');
+        const imgPreview = document.getElementById('imgPreview');
+        const iconeSemPreview = document.getElementById('iconeSemPreview');
+        const capaOriginal = '@(Model.FotoCapa ?? "")';
+
+        function definirPreview(url) {
+            if (url) {
+                imgPreview.src = url;
+                imgPreview.classList.remove('d-none');
+                iconeSemPreview.classList.add('d-none');
+            } else {
+                imgPreview.src = '#';
+                imgPreview.classList.add('d-none');
+                iconeSemPreview.classList.remove('d-none');
+            }
+        }
+
+        campoArquivo?.addEventListener('change', function () {
+            const arquivo = this.files[0];
+            if (arquivo) {
+                if (campoUrl) campoUrl.value = '';
+                if (checkRemover) checkRemover.checked = false;
+                const leitor = new FileReader();
+                leitor.onload = function (e) {
+                    definirPreview(e.target.result);
+                };
+                leitor.readAsDataURL(arquivo);
+            } else {
+                definirPreview(capaOriginal || null);
+            }
+        });
+
+        campoUrl?.addEventListener('input', function () {
+            const url = this.value.trim();
+            if (url) {
+                if (campoArquivo) campoArquivo.value = '';
+                if (checkRemover) checkRemover.checked = false;
+                definirPreview(url);
+            } else {
+                definirPreview(capaOriginal || null);
+            }
+        });
+
+        checkRemover?.addEventListener('change', function () {
+            if (this.checked) {
+                if (campoArquivo) campoArquivo.value = '';
+                if (campoUrl) campoUrl.value = '';
+                definirPreview(null);
+            } else {
+                definirPreview(capaOriginal || null);
+            }
+        });
+    </script>
 }

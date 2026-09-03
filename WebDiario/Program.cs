@@ -2,23 +2,28 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebDiario.Data;
 
-var builder = WebApplication.CreateBuilder(args);
+// Configura o diretório base com precisão para execução via .exe ou terminal
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = AppContext.BaseDirectory,
+    WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot")
+});
 
-// 1. Serviços essenciais do MVC
+// 1. Serviços essenciais do MVC (Controllers e Views clássicas)
 builder.Services.AddControllersWithViews();
 
-// 2. Conexão com SQLite
+// 2. Conexão com o Banco de Dados
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 3. Configuração do Identity para trabalhar com Controllers/Views
+// 3. Configuração do Identity (Apenas usuário, sem e-mail)
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-    // Permite letras, números, hífens, sublinhados e pontos no usuário
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-    options.User.RequireUniqueEmail = false; // Não exige validação de e-mail único
+    options.User.RequireUniqueEmail = false;
 
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
@@ -29,18 +34,19 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// 4. Configuração do Cookie de autenticação (redireciona para o Controller de Conta)
+// 4. Configuração do Cookie de autenticação
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Conta/Login";
-    options.AccessDeniedPath = "/Conta/AcessoNegado";
+    options.LogoutPath = "/Conta/Sair";
+    options.AccessDeniedPath = "/Conta/Login";
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 5. Pipeline HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -48,19 +54,21 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// ESSENCIAL: Permite servir arquivos dinâmicos enviados pelo usuário (upload de capas)
+app.UseStaticFiles();
+
 app.UseRouting();
 
-// 5. Ordem obrigatória: Autenticação antes de Autorização
+// 6. Autenticação antes de Autorização
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-// Aplica as migrações automaticamente ao subir a aplicação
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// 7. Aplica as migrações automaticamente ao subir a aplicação
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
